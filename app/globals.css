@@ -4,6 +4,9 @@
   :root, :host {
     --font-sans: var(--font-geist-sans);
     --font-mono: var(--font-geist-mono);
+    --color-blue-600: oklch(0.546 0.245 262.881);
+    --color-gray-100: oklch(0.967 0.003 264.542);
+    --color-gray-700: oklch(0.373 0.034 259.733);
     --color-black: #000;
     --color-white: #fff;
     --spacing: 0.25rem;
@@ -11,8 +14,11 @@
     --text-sm--line-height: calc(1.25 / 0.875);
     --text-base: 1rem;
     --text-base--line-height: calc(1.5 / 1);
+    --text-3xl: 1.875rem;
+    --text-3xl--line-height: calc(2.25 / 1.875);
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
+    --font-weight-bold: 700;
     --default-transition-duration: 150ms;
     --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     --default-font-family: var(--font-sans);
@@ -177,6 +183,9 @@
   .row-start-3 {
     grid-row-start: 3;
   }
+  .mt-4 {
+    margin-top: calc(var(--spacing) * 4);
+  }
   .mb-2 {
     margin-bottom: calc(var(--spacing) * 2);
   }
@@ -260,6 +269,9 @@
   .bg-foreground {
     background-color: var(--foreground);
   }
+  .bg-gray-100 {
+    background-color: var(--color-gray-100);
+  }
   .p-8 {
     padding: calc(var(--spacing) * 8);
   }
@@ -284,6 +296,10 @@
   .font-\[family-name\:var\(--font-geist-sans\)\] {
     font-family: var(--font-geist-sans);
   }
+  .text-3xl {
+    font-size: var(--text-3xl);
+    line-height: var(--tw-leading, var(--text-3xl--line-height));
+  }
   .text-sm {
     font-size: var(--text-sm);
     line-height: var(--tw-leading, var(--text-sm--line-height));
@@ -291,6 +307,10 @@
   .text-sm\/6 {
     font-size: var(--text-sm);
     line-height: calc(var(--spacing) * 6);
+  }
+  .font-bold {
+    --tw-font-weight: var(--font-weight-bold);
+    font-weight: var(--font-weight-bold);
   }
   .font-medium {
     --tw-font-weight: var(--font-weight-medium);
@@ -306,6 +326,12 @@
   }
   .text-background {
     color: var(--background);
+  }
+  .text-blue-600 {
+    color: var(--color-blue-600);
+  }
+  .text-gray-700 {
+    color: var(--color-gray-700);
   }
   .antialiased {
     -webkit-font-smoothing: antialiased;
