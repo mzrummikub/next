@@ -4,7 +4,10 @@ module.exports = {
     "./components/**/*.{js,jsx}"
   ],
   theme: {
-    extend: {},
+    extend: {belwe: ['Belwe', 'serif'],},
   },
   plugins: [],
+  
+  
+  
 };

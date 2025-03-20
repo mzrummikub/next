@@ -5,7 +5,7 @@ import "../styles/globals.css";
 export default function RootLayout({ children }) {
   return (
     <html lang="pl">
-      <body className="w-full h-screen flex flex-col bg-auto bg-gradient-to-tr from-[#bb0808] to-[#ff7878]">
+      <body>
         <Navbar />
         <div className="flex justify-left items-center">
           <Sidebar />

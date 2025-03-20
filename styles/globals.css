@@ -1,14 +1,18 @@
 @import "tailwindcss";
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
-:root {
-    --background: #ff3838;
-    --foreground: #171717;
-}
 
-h1 {
-    font-size: larger;
-    font-weight: 300;
-}
+   body {
+      background-color: #094fc2;
+     }
+
+     @font-face {
+        font-family: 'Belwe';
+        src: url('/Belwe.woff2') format('woff2'),
+             url('/Belwe.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+      
+      .font-belwe {
+        font-family: 'Belwe', serif;
+      }
