@@ -1,45 +1,41 @@
 "use client";
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
 export default function Dashboard() {
-  const [userEmail, setUserEmail] = useState(null);
   const router = useRouter();
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const { data, error } = await supabase.auth.getUser();
-      if (error) {
-        console.error("Błąd pobierania użytkownika:", error.message);
-        router.push("/login"); // Jeśli użytkownik nie jest zalogowany, przekieruj na login
+    async function fetchUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push("/login"); // Przekierowanie na login jeśli nie ma użytkownika
       } else {
-        setUserEmail(data.user?.email);
+        setUser(user);
       }
-    };
-
+    }
     fetchUser();
-  }, [router]);
+  }, []);
 
-  const handleLogout = async () => {
+  async function handleLogout() {
     await supabase.auth.signOut();
-    router.push("/login"); // Przekierowanie po wylogowaniu
-  };
+    router.push("/login");
+  }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Panel użytkownika</h1>
-      {userEmail ? (
-        <p className="mt-2 text-gray-700">Zalogowano jako: <strong>{userEmail}</strong></p>
-      ) : (
-        <p className="mt-2 text-gray-500">Ładowanie...</p>
-      )}
-      <button
-        onClick={handleLogout}
-        className="mt-4 p-2 bg-red-500 text-white rounded"
-      >
-        Wyloguj się
-      </button>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow-md w-96 text-center">
+        <h2 className="text-2xl font-bold mb-4">Witaj, {user?.email}</h2>
+        <button
+          onClick={handleLogout}
+          className="w-full bg-red-500 text-white p-2 rounded hover:bg-red-600"
+        >
+          Wyloguj się
+        </button>
+      </div>
     </div>
   );
 }

@@ -1,60 +1,75 @@
-"use client"; // Jeśli używasz App Router
-import { useState } from "react";
-import { supabase } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
+'use client'
+import { useState } from 'react'
+import { createClient } from '@supabase/supabase-js'
 
-export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
-  const router = useRouter();
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+)
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError(null);
+export default function RegisterForm() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [repeatPassword, setRepeatPassword] = useState('')
+  const [message, setMessage] = useState('')
 
-    const { user, error } = await supabase.auth.signInWithPassword({
+  const handleRegister = async (e) => {
+    e.preventDefault()
+
+    if (password !== repeatPassword) {
+      setMessage('Hasła się różnią!')
+      return
+    }
+
+    const { error } = await supabase.auth.signUp({
       email,
       password,
-    });
+    })
 
     if (error) {
-      setError(error.message);
+      setMessage(`Błąd: ${error.message}`)
     } else {
-      router.push("/dashboard"); // Po zalogowaniu przekierowanie na stronę główną
+      setMessage('Sprawdź swoją skrzynkę pocztową, aby potwierdzić konto!')
     }
-  };
+  }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-sm p-6 bg-white shadow-md rounded-md">
-        <h2 className="text-2xl font-bold text-center mb-4">Zaloguj się</h2>
-        {error && <p className="text-red-500 text-center">{error}</p>}
-        <form onSubmit={handleLogin} className="space-y-4">
-          <input
-            type="email"
-            placeholder="E-mail"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 border rounded"
-            required
-          />
-          <input
-            type="password"
-            placeholder="Hasło"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 border rounded"
-            required
-          />
-          <button
-            type="submit"
-            className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-          >
-            Zaloguj się
-          </button>
-        </form>
-      </div>
-    </div>
-  );
+    <form onSubmit={handleRegister} className="max-w-sm mx-auto space-y-4">
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        required
+        onChange={(e) => setEmail(e.target.value)}
+        className="w-full px-3 py-2 border rounded"
+      />
+
+      <input
+        type="password"
+        placeholder="Hasło"
+        value={password}
+        required
+        onChange={(e) => setPassword(e.target.value)}
+        className="w-full px-3 py-2 border rounded"
+      />
+
+      <input
+        type="password"
+        placeholder="Potwierdź hasło"
+        value={repeatPassword}
+        required
+        onChange={(e) => setRepeatPassword(e.target.value)}
+        className="w-full px-3 py-2 border rounded"
+      />
+
+      <button
+        type="submit"
+        className="w-full px-3 py-2 bg-blue-600 text-white rounded"
+      >
+        Załóż konto
+      </button>
+
+      {message && <p className="text-center text-sm text-red-500">{message}</p>}
+    </form>
+  )
 }
