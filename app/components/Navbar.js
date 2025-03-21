@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import Image from 'next/image'
 import '@/styles/globals.css'
@@ -13,6 +13,17 @@ export function Navbar() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user)
+    })
+
+    supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user || null)
+    })
+  }, [])
 
   const handleNavbarLogin = async (e) => {
     e.preventDefault()
@@ -30,19 +41,21 @@ export function Navbar() {
   }
 
   return (
-    <nav className="bg-gray-800 text-white px-4 py-2">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center">
-          <Image
-            src="/logo.png"
-            alt="Logo"
-            width={150}
-            height={0}
-            className="mr-3"
-          />
-        </div>
+    <nav className="w-full px-4 py-2">
+      <div className="flex justify-center items-center">
+        <Image
+          src="/logo.png"
+          alt="Logo"
+          width={600}
+          height={0}
+          className="mb-2"
+        />
+      </div>
 
-        <form onSubmit={handleNavbarLogin} className="flex items-center gap-2">
+      {user ? (
+        <p className="text-center">Jesteś zalogowany: {user.email}</p>
+      ) : (
+        <form onSubmit={handleNavbarLogin} className="flex justify-center items-center gap-2">
           <input
             type="email"
             placeholder="Email"
@@ -68,9 +81,10 @@ export function Navbar() {
             Zaloguj
           </button>
         </form>
-      </div>
+      )}
+
       {message && <p className="text-sm text-center text-red-500 mt-2">{message}</p>}
-      <hr className="w-full border-t border-white mt-4" />
+      <hr className="w-full border-t border-gray-300 mt-4" />
     </nav>
   )
 }
