@@ -46,9 +46,10 @@ export function Navbar() {
         <Image
           src="/logo.png"
           alt="Logo"
-          width={600}
+          width={0}
           height={0}
-          className="mb-2"
+          sizes="100vw"
+          className="mb-2 w-full max-w-[600px] h-auto"
         />
       </div>
 
