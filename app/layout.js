@@ -1,4 +1,4 @@
-import {Navbar} from "./components/Navbar";
+import { Navbar } from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import "../styles/globals.css";
 
@@ -7,9 +7,11 @@ export default function RootLayout({ children }) {
     <html lang="pl">
       <body>
         <Navbar />
-        <div className="flex justify-left items-center">
+        <div className="flex items-start">
           <Sidebar />
-          <main className=" p-4">{children}</main>
+          <main className="flex-1 p-4 flex justify-center">
+            {children}
+          </main>
         </div>
       </body>
     </html>

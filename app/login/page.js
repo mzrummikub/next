@@ -34,42 +34,44 @@ export default function RegisterForm() {
   }
 
   return (
-    <form onSubmit={handleRegister} className="max-w-sm mx-auto space-y-4">
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        required
-        onChange={(e) => setEmail(e.target.value)}
-        className="w-full px-3 py-2 border rounded"
-      />
+    <div className="flex justify-center w-full">
+      <form onSubmit={handleRegister} className="w-full max-w-sm space-y-4 mx-auto">
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          required
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full px-3 py-2 border rounded"
+        />
 
-      <input
-        type="password"
-        placeholder="Hasło"
-        value={password}
-        required
-        onChange={(e) => setPassword(e.target.value)}
-        className="w-full px-3 py-2 border rounded"
-      />
+        <input
+          type="password"
+          placeholder="Hasło"
+          value={password}
+          required
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full px-3 py-2 border rounded"
+        />
 
-      <input
-        type="password"
-        placeholder="Potwierdź hasło"
-        value={repeatPassword}
-        required
-        onChange={(e) => setRepeatPassword(e.target.value)}
-        className="w-full px-3 py-2 border rounded"
-      />
+        <input
+          type="password"
+          placeholder="Potwierdź hasło"
+          value={repeatPassword}
+          required
+          onChange={(e) => setRepeatPassword(e.target.value)}
+          className="w-full px-3 py-2 border rounded"
+        />
 
-      <button
-        type="submit"
-        className="w-full px-3 py-2 bg-blue-600 text-white rounded"
-      >
-        Załóż konto
-      </button>
+        <button
+          type="submit"
+          className="w-full px-3 py-2 bg-blue-600 text-white rounded"
+        >
+          Załóż konto
+        </button>
 
-      {message && <p className="text-center text-sm text-red-500">{message}</p>}
-    </form>
+        {message && <p className="text-center text-sm text-red-500">{message}</p>}
+      </form>
+    </div>
   )
 }
