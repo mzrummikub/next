@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import Image from 'next/image'
+import Link from 'next/link'
 import '@/styles/globals.css'
 
 const supabase = createClient(
@@ -14,6 +15,7 @@ export function Navbar() {
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
   const [user, setUser] = useState(null)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -42,21 +44,39 @@ export function Navbar() {
 
   return (
     <nav className="w-full px-4 py-2">
-      <div className="flex justify-center items-center">
-        <Image
-          src="/logo.png"
-          alt="Logo"
-          width={0}
-          height={0}
-          sizes="100vw"
-          className="mb-2 w-full max-w-[600px] h-auto"
-        />
+      <div className="flex justify-between items-center">
+        <div className="flex items-center">
+          <Image
+            src="/logo.png"
+            alt="Logo"
+            width={0}
+            height={0}
+            sizes="100vw"
+            className="mb-2 w-full max-w-[600px] h-auto"
+          />
+        </div>
+
+        <button
+          className="sm:hidden block text-2xl"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          ☰
+        </button>
+      </div>
+
+      <div className={`sm:hidden ${isMenuOpen ? 'block' : 'hidden'} mt-4 space-y-2`}>
+        <Link href="/">
+          <button className="w-full px-3 py-2 bg-blue-600 text-white rounded">Home</button>
+        </Link>
+        <Link href="/login">
+          <button className="w-full px-3 py-2 bg-blue-600 text-white rounded">Logowanie</button>
+        </Link>
       </div>
 
       {user ? (
-        <p className="text-center">Jesteś zalogowany: {user.email}</p>
+        <p className="text-center mt-4">Jesteś zalogowany: {user.email}</p>
       ) : (
-        <form onSubmit={handleNavbarLogin} className="flex justify-center items-center gap-2">
+        <form onSubmit={handleNavbarLogin} className="hidden sm:flex justify-center items-center gap-2 mt-4">
           <input
             type="email"
             placeholder="Email"
