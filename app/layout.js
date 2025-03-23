@@ -8,7 +8,9 @@ export default function RootLayout({ children }) {
       <body>
         <Navbar />
         <div className="flex items-start">
-          <Sidebar />
+          <div className="hidden sm:block">
+            <Sidebar />
+          </div>
           <main className="flex-1 p-4 flex justify-center">
             {children}
           </main>
