@@ -44,13 +44,9 @@ export function Navbar() {
 
   return (
     <nav className="w-full px-4 py-2">
-
-      {/********************************************************************
-        SEKCJA MOBILNA (poniżej 640px): trzy wiersze
-      ********************************************************************/}
+      {/* SEKCJA MOBILNA */}
       <div className="sm:hidden flex flex-col w-full">
-        
-        {/** RZĄD 1: Hamburger w prawym górnym rogu */}
+        {/* RZĄD 1: Hamburger */}
         <div className="flex justify-end">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -60,38 +56,37 @@ export function Navbar() {
           </button>
         </div>
 
-        {/** RZĄD 2: Logo wyśrodkowane */}
+        {/* RZĄD 2: Logo wyśrodkowane */}
         <div className="flex justify-center my-2">
           <Image
             src="/logo.png"
             alt="Logo"
-            width={640}      
+            width={640}
             height={0}
             className="w-full max-w-[640px] h-auto"
           />
         </div>
 
-        {/** Jeśli isMenuOpen == true, to pokazujemy rozwijane menu */}
+        {/* MENU PO OTWARCIU (Home + Logowanie) */}
         {isMenuOpen && (
-          <div className="mt-2 space-y-2">
+          <div className="w-auto mt-2 flex flex-col items-center space-y-2">
             <Link href="/">
-              <button className="w-full px-3 py-2 bg-blue-600 text-white rounded">
+              <button className="w-60 px-2 py-2 bg-blue-600 text-white rounded-xl">
                 Home
               </button>
             </Link>
+
             <Link href="/login">
-              <button className="w-full px-3 py-2 bg-blue-600 text-white rounded">
+              <button className="w-60 px-2 py-2 bg-blue-600 text-white rounded-xl">
                 Logowanie
               </button>
             </Link>
           </div>
         )}
 
-        {/** RZĄD 3: Informacja o zalogowaniu albo formularz logowania */}
+        {/* RZĄD 3: Informacja o zalogowaniu lub formularz */}
         {user ? (
-          <p className="text-center mt-4">
-            Jesteś zalogowany: {user.email}
-          </p>
+          <p className="text-center mt-4">Jesteś zalogowany: {user.email}</p>
         ) : (
           <form
             onSubmit={handleNavbarLogin}
@@ -123,11 +118,8 @@ export function Navbar() {
         )}
       </div>
 
-      {/********************************************************************
-        SEKCJA DESKTOPOWA (powyżej 640px)
-      ********************************************************************/}
+      {/* SEKCJA DESKTOPOWA */}
       <div className="hidden sm:block">
-        {/* Logo wyśrodkowane */}
         <div className="flex justify-center items-center">
           <Image
             src="/logo.png"
@@ -138,7 +130,6 @@ export function Navbar() {
           />
         </div>
 
-        {/** Jeśli zalogowany -> wyświetl e-mail, w przeciwnym razie formularz */}
         {user ? (
           <p className="text-center mt-4">Jesteś zalogowany: {user.email}</p>
         ) : (
@@ -172,7 +163,6 @@ export function Navbar() {
         )}
       </div>
 
-      {/** Wiadomości o błędach */}
       {message && (
         <p className="text-sm text-center text-red-500 mt-2">{message}</p>
       )}
