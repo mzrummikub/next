@@ -17,7 +17,7 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <aside className={`
-        fixed sm:relative top-0 left-0 h-full bg-gray-800 text-white p-4 z-40
+        fixed sm:relative top-0 left-0 h-full text-white p-4 z-40
         transition-transform transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
         sm:translate-x-0 sm:w-64 w-64
       `}>
