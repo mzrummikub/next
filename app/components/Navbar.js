@@ -1,32 +1,63 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { createClient } from '@supabase/supabase-js'
 import '@/styles/globals.css'
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+)
 export function Navbar() {
+  // MUSI BYĆ:
+  const [user, setUser] = useState(null)  // <-- Deklaracja stanu user
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+  // (Opcjonalnie) useEffect, żeby pobrać aktualnego usera
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user)
+    })
+
+    supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user || null)
+    })
+  }, [])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+  }
 
   return (
     <nav className="w-full px-4 py-2">
       {/* SEKCJA MOBILNA */}
       <div className="sm:hidden flex flex-col w-full">
-        {/* RZĄD 1: Ikony po lewej, Hamburger po prawej */}
+        {/* RZĄD 1: Ikony po lewej / Hamburger po prawej */}
         <div className="flex items-center justify-end">
-          {/* LEWA STRONA: Ikony/teksty */}
           <div className="flex items-center gap-2">
-            <Link href="/login">
-              <button className=" text-white rounded-xl px-2 py-2">
-                Zaloguj się
+           
+            {user ? (
+              <button
+                onClick={handleLogout}
+                className=" text-white text-xs px-2 py-2"
+              >
+                Wyloguj się
               </button>
-            </Link>
+            ) : (
+              <Link href="/login">
+                <button className=" text-white text-xs px-2 py-2">
+                  Zaloguj się
+                </button>
+              </Link>
+            )}
             <Link href="/register">
-              <button className=" text-white rounded-xl px-2 py-2">
+              <button className=" text-white text-xs px-2 py-2">
                 Zarejestruj się
               </button>
             </Link>
             <Link href="/panel">
-              <button className=" text-white rounded-xl px-2 py-2">
+              <button className=" text-white text-xs px-2 py-2">
                 Panel klienta
               </button>
             </Link>
@@ -72,20 +103,30 @@ export function Navbar() {
 
       {/* SEKCJA DESKTOPOWA */}
       <div className="hidden sm:block">
-        {/* 1) Ikony (Zaloguj się / Zarejestruj się / Panel) */}
+        {/* Wiersz z przyciskami */}
         <div className="flex items-center justify-end gap-2 mb-2">
-          <Link href="/login">
-            <button className=" text-white rounded-xl px-2 py-2">
-              Zaloguj się
+          {user ? (
+            <button
+              onClick={handleLogout}
+              className=" text-white text-xs px-2 py-2"
+            >
+              Wyloguj się
             </button>
-          </Link>
+          ) : (
+            <Link href="/login">
+              <button className=" text-white text-xs px-2 py-2">
+                Zaloguj się
+              </button>
+            </Link>
+          )}
+
           <Link href="/register">
-            <button className=" text-white rounded-xl px-2 py-2">
+            <button className=" text-white text-xs px-2 py-2">
               Zarejestruj się
             </button>
           </Link>
           <Link href="/panel">
-            <button className=" text-white rounded-xl px-2 py-2">
+            <button className=" text-white text-xs px-2 py-2">
               Panel klienta
             </button>
           </Link>
