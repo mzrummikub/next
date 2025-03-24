@@ -25,14 +25,14 @@ export default function Sidebar() {
           {/* HOME */}
           <li>
             <Link href="/">
-              <button className="w-full px-4 py-2 bg-blue-500 rounded">Home</button>
+              <button className="w-full px-4 py-2 bg-blue-600 rounded">Home</button>
             </Link>
           </li>
 
           {/* LOGOWANIE */}
           <li>
             <Link href="/login">
-              <button className="w-full px-4 py-2 bg-blue-500 rounded">Logowanie</button>
+              <button className="w-full px-4 py-2 bg-blue-600 rounded">Logowanie</button>
             </Link>
           </li>
         </ul>
