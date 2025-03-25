@@ -9,22 +9,18 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
-export function Navbar() {
-  // MUSI BYĆ:
-  const [user, setUser] = useState(null)  // <-- Deklaracja stanu user
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
-  // (Opcjonalnie) useEffect, żeby pobrać aktualnego usera
+export function Navbar() {
+  const [user, setUser] = useState(null)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user)
     })
-
     supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user || null)
     })
   }, [])
-
   const handleLogout = async () => {
     await supabase.auth.signOut()
   }
@@ -36,31 +32,34 @@ export function Navbar() {
         {/* RZĄD 1: Ikony po lewej / Hamburger po prawej */}
         <div className="flex items-center justify-end">
           <div className="flex items-center gap-2">
-           
             {user ? (
-              <button
-                onClick={handleLogout}
-                className=" text-white text-xs px-2 py-2"
-              >
-                Wyloguj się
-              </button>
-            ) : (
-              <Link href="/login">
-                <button className=" text-white text-xs px-2 py-2">
-                  Zaloguj się
+              <>
+                <button
+                  onClick={handleLogout}
+                  className="text-white text-xs px-2 py-2"
+                >
+                  Wyloguj się
                 </button>
-              </Link>
+                <Link href="/panel">
+                  <button className="text-white text-xs px-2 py-2">
+                    Panel gracza
+                  </button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/login">
+                  <button className="text-white text-xs px-2 py-2">
+                    Zaloguj się
+                  </button>
+                </Link>
+                <Link href="/register">
+                  <button className="text-white text-xs px-2 py-2">
+                    Zarejestruj się
+                  </button>
+                </Link>
+              </>
             )}
-            <Link href="/register">
-              <button className=" text-white text-xs px-2 py-2">
-                Zarejestruj się
-              </button>
-            </Link>
-            <Link href="/panel">
-              <button className=" text-white text-xs px-2 py-2">
-                Panel klienta
-              </button>
-            </Link>
           </div>
 
           {/* PRAWY RÓG: Hamburger */}
@@ -86,7 +85,6 @@ export function Navbar() {
         {/* MENU PO OTWARCIU (opcjonalnie możesz coś dodać) */}
         {isMenuOpen && (
           <div className="w-auto mt-2 flex flex-col items-center space-y-2">
-            {/* Przykładowe rozwijane linki, jeśli chcesz je mieć */}
             <Link href="/">
               <button className="w-60 px-2 py-2 bg-blue-600 text-white rounded-xl">
                 Home
@@ -106,33 +104,36 @@ export function Navbar() {
         {/* Wiersz z przyciskami */}
         <div className="flex items-center justify-end gap-2 mb-2">
           {user ? (
-            <button
-              onClick={handleLogout}
-              className=" text-white text-xs px-2 py-2"
-            >
-              Wyloguj się
-            </button>
-          ) : (
-            <Link href="/login">
-              <button className=" text-white text-xs px-2 py-2">
-                Zaloguj się
+            <>
+              <button
+                onClick={handleLogout}
+                className="text-white text-xs px-2 py-2"
+              >
+                Wyloguj się
               </button>
-            </Link>
+              <Link href="/panel">
+                <button className="text-white text-xs px-2 py-2">
+                  Panel gracza
+                </button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/login">
+                <button className="text-white text-xs px-2 py-2">
+                  Zaloguj się
+                </button>
+              </Link>
+              <Link href="/register">
+                <button className="text-white text-xs px-2 py-2">
+                  Zarejestruj się
+                </button>
+              </Link>
+            </>
           )}
-
-          <Link href="/register">
-            <button className=" text-white text-xs px-2 py-2">
-              Zarejestruj się
-            </button>
-          </Link>
-          <Link href="/panel">
-            <button className=" text-white text-xs px-2 py-2">
-              Panel klienta
-            </button>
-          </Link>
         </div>
 
-        {/* 2) Logo */}
+        {/* Logo */}
         <div className="flex justify-center items-center">
           <Image
             src="/logo.png"
