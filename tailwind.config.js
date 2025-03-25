@@ -1,13 +1,10 @@
 module.exports = {
   content: [
-    "./app/**/*.{js,jsx}",
-    "./components/**/*.{js,jsx}"
+    './app/**/*.{ts,tsx}',          // dla App Router
+    './components/**/*.{ts,tsx}',   // dla komponentów
   ],
   theme: {
-    extend: {belwe: ['Belwe', 'serif'],},
+    extend: {},
   },
   plugins: [],
-  
-  
-  
-};
+}

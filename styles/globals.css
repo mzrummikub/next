@@ -1,20 +1,8 @@
-@import "tailwindcss";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+
    body {
       background-color: #094fc2;
      }
-
-     @font-face {
-        font-family: 'Belwe';
-        src: url('/Belwe.woff2') format('woff2'),
-             url('/Belwe.ttf') format('truetype');
-        font-weight: normal;
-        font-style: normal;
-      }
-      
-      .font-belwe {
-        font-family: 'Belwe', serif;
-      }

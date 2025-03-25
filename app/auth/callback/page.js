@@ -12,13 +12,17 @@ export default function AuthCallback() {
   const router = useRouter()
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
-        router.push('/')
+    const handleAuth = async () => {
+      const { error } = await supabase.auth.exchangeCodeForSession()
+      if (error) {
+        console.error('Błąd logowania:', error.message)
+        router.push('/login') // lub pokaż błąd użytkownikowi
       } else {
-        router.push('/login')
+        router.push('/') // lub np. '/dashboard'
       }
-    })
+    }
+
+    handleAuth()
   }, [router])
 
   return <div>Trwa potwierdzanie konta...</div>

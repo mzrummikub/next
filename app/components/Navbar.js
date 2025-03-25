@@ -13,31 +13,35 @@ const supabase = createClient(
 export function Navbar() {
   const [user, setUser] = useState(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user)
     })
-    supabase.auth.onAuthStateChange((event, session) => {
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user || null)
     })
+
+    return () => {
+      authListener?.subscription.unsubscribe()
+    }
   }, [])
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
   }
 
   return (
-    <nav className="w-full px-4 py-2">
-      {/* SEKCJA MOBILNA */}
+    <nav >
+      {/* MOBILE */}
       <div className="sm:hidden flex flex-col w-full">
-        {/* RZĄD 1: Ikony po lewej / Hamburger po prawej */}
         <div className="flex items-center justify-end">
           <div className="flex items-center gap-2">
             {user ? (
               <>
-                <button
-                  onClick={handleLogout}
-                  className="text-white text-xs px-2 py-2"
-                >
+                <button onClick={handleLogout} className="text-white text-xs px-2 py-2">
                   Wyloguj się
                 </button>
                 <Link href="/panel">
@@ -62,16 +66,15 @@ export function Navbar() {
             )}
           </div>
 
-          {/* PRAWY RÓG: Hamburger */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="text-2xl text-white p-2 rounded"
+            aria-label="Toggle menu"
           >
             ☰
           </button>
         </div>
 
-        {/* RZĄD 2: Logo wyśrodkowane */}
         <div className="flex justify-center my-2">
           <Image
             src="/logo.png"
@@ -82,7 +85,6 @@ export function Navbar() {
           />
         </div>
 
-        {/* MENU PO OTWARCIU (opcjonalnie możesz coś dodać) */}
         {isMenuOpen && (
           <div className="w-auto mt-2 flex flex-col items-center space-y-2">
             <Link href="/">
@@ -90,25 +92,21 @@ export function Navbar() {
                 Home
               </button>
             </Link>
-            <Link href="/inne">
+            <Link href="/panel">
               <button className="w-60 px-2 py-2 bg-blue-600 text-white rounded-xl">
-                Inne
+                Panel gracza
               </button>
             </Link>
           </div>
         )}
       </div>
 
-      {/* SEKCJA DESKTOPOWA */}
+      {/* DESKTOP */}
       <div className="hidden sm:block">
-        {/* Wiersz z przyciskami */}
         <div className="flex items-center justify-end gap-2 mb-2">
           {user ? (
             <>
-              <button
-                onClick={handleLogout}
-                className="text-white text-xs px-2 py-2"
-              >
+              <button onClick={handleLogout} className="text-white text-xs px-2 py-2">
                 Wyloguj się
               </button>
               <Link href="/panel">
@@ -133,7 +131,6 @@ export function Navbar() {
           )}
         </div>
 
-        {/* Logo */}
         <div className="flex justify-center items-center">
           <Image
             src="/logo.png"
