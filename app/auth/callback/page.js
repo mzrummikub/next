@@ -16,7 +16,7 @@ export default function AuthCallback() {
       const { error } = await supabase.auth.exchangeCodeForSession()
       if (error) {
         console.error('Błąd logowania:', error.message)
-        router.push('/app/callback') // lub pokaż błąd użytkownikowi
+        router.push('/login') // lub pokaż błąd użytkownikowi
       } else {
         router.push('/') // lub np. '/dashboard'
       }
