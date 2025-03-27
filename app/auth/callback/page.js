@@ -8,22 +8,29 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
 
-export default function AuthCallback() {
+export default function AuthCallbackPage() {
   const router = useRouter()
 
   useEffect(() => {
-    const handleAuth = async () => {
-      const { error } = await supabase.auth.exchangeCodeForSession()
+    const confirmUser = async () => {
+      const { data, error } = await supabase.auth.getSession()
+
       if (error) {
-        console.error('Błąd logowania:', error.message)
-        router.push('/login') // lub pokaż błąd użytkownikowi
+        console.error('Błąd sesji:', error)
+        return
+      }
+
+      if (data?.session) {
+        // Zalogowany po potwierdzeniu
+        router.push('/panel')
       } else {
-        router.push('/') // lub np. '/dashboard'
+        // Jeśli nie ma sesji – przekieruj do logowania
+        router.push('/login')
       }
     }
 
-    handleAuth()
+    confirmUser()
   }, [router])
 
-  return <div>Trwa potwierdzanie konta....</div>
+  return <div>Trwa potwierdzanie konta...</div>
 }
