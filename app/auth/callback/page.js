@@ -25,5 +25,5 @@ export default function AuthCallback() {
     handleAuth()
   }, [router])
 
-  return <div>Trwa potwierdzanie konta...</div>
+  return <div>Trwa potwierdzanie konta....</div>
 }
