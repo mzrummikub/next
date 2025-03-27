@@ -9,28 +9,38 @@ const supabase = createClient(
 )
 
 export default function EmailVerifyPage() {
-  const [status, setStatus] = useState('loading') // loading | success | error
+  const [status, setStatus] = useState('loading')
   const router = useRouter()
 
   useEffect(() => {
-    const verifyEmail = async () => {
-      const { data, error } = await supabase.auth.getSession()
+    const verifyFromUrl = async () => {
+      // Pobierz dane z hash z URL
+      const hash = window.location.hash.substr(1)
+      const params = new URLSearchParams(hash)
+      const access_token = params.get('access_token')
+      const refresh_token = params.get('refresh_token')
 
-      if (error || !data?.session) {
+      if (access_token && refresh_token) {
+        const { error } = await supabase.auth.setSession({
+          access_token,
+          refresh_token,
+        })
+
+        if (error) {
+          setStatus('error')
+          return
+        }
+
+        setStatus('success')
+        setTimeout(() => {
+          router.push('/panel')
+        }, 3000)
+      } else {
         setStatus('error')
-        return
       }
-
-      // Użytkownik zalogowany – potwierdzona weryfikacja
-      setStatus('success')
-
-      // Możesz np. przekierować po 3 sek do panelu:
-      setTimeout(() => {
-        router.push('/panel')
-      }, 3000)
     }
 
-    verifyEmail()
+    verifyFromUrl()
   }, [router])
 
   return (
@@ -48,8 +58,8 @@ export default function EmailVerifyPage() {
 
       {status === 'error' && (
         <>
-          <h1 className="text-2xl font-semibold text-red-600">❌ Nie udało się zweryfikować konta.</h1>
-          <p className="mt-2 text-gray-700">Spróbuj ponownie kliknąć link lub zaloguj się ręcznie.</p>
+          <h1 className="text-2xl font-semibold text-red-600">❌ Nie udało się potwierdzić konta</h1>
+          <p className="mt-2 text-gray-700">Spróbuj zalogować się ręcznie lub użyj poprawnego linku.</p>
           <a href="/login" className="mt-4 text-blue-600 underline">Przejdź do logowania</a>
         </>
       )}
