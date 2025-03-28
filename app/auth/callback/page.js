@@ -9,7 +9,7 @@ export default function CallbackPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        router.push('/profile');
+        router.push('/dashboard');
       } else {
         router.push('/login');
       }
