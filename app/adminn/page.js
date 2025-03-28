@@ -42,7 +42,7 @@ export default function AdminPage() {
 
       // Jeżeli is_admin = false lub null – przekieruj na stronę główną
       if (!playerData.is_admin) {
-        router.push('/a');
+        router.push('/');
         return;
       }
 
