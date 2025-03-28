@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -18,14 +19,41 @@ export default function RegisterPage() {
       return;
     }
 
-    const { error } = await supabase.auth.signUp({ email, password });
+    // 1. Rejestracja użytkownika przez Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
 
-    if (error) {
-      setMessage(error.message);
-    } else {
-      setMessage('Konto utworzone! Sprawdź swoją skrzynkę e-mail, aby potwierdzić konto.');
-      setTimeout(() => router.push('/login'), 5000);
+    if (authError) {
+      setMessage(authError.message);
+      return;
     }
+
+    // 2. Aktualizacja user_metadata – ustawienie nazwy użytkownika
+    const { error: updateError } = await supabase.auth.updateUser({
+      data: { username: username },
+    });
+    if (updateError) {
+      setMessage(updateError.message);
+      return;
+    }
+
+    // 3. Dodanie dodatkowych danych do tabeli "user"
+    const userId = authData.user.id;
+    const { error: dbError } = await supabase
+      .from('user')
+      .insert([{ id: userId, email, username, role: 'user' }]);
+
+    if (dbError) {
+      setMessage(dbError.message);
+      return;
+    }
+
+    setMessage(
+      'Konto utworzone! Sprawdź skrzynkę e-mail, aby potwierdzić konto.'
+    );
+    setTimeout(() => router.push('/login'), 5000);
   };
 
   return (
@@ -42,6 +70,15 @@ export default function RegisterPage() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <input
+          type="text"
+          placeholder="Nazwa użytkownika"
+          className="w-full border p-2 rounded"
+          required
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
         />
 
         <input
@@ -62,7 +99,10 @@ export default function RegisterPage() {
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
 
-        <button className="w-full bg-blue-600 text-white p-2 rounded">
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white p-2 rounded"
+        >
           Zarejestruj się
         </button>
       </form>

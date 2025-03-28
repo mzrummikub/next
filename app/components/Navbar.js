@@ -12,16 +12,46 @@ const supabase = createClient(
 
 export function Navbar() {
   const [user, setUser] = useState(null)
+  const [username, setUsername] = useState(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
-
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user)
-    })
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+
+      if (user) {
+        // Pobieramy dane z tabeli "user", na podstawie id z auth.users
+        const { data, error } = await supabase
+          .from('user')
+          .select('username')
+          .eq('id', user.id)
+          .single()
+
+        if (error) {
+          console.error('Błąd przy pobieraniu username z tabeli user:', error)
+        } else {
+          setUsername(data.username)
+        }
+      }
+    }
+
+    getUser()
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user || null)
+      if (session?.user) {
+        supabase
+          .from('user')
+          .select('username')
+          .eq('id', session.user.id)
+          .single()
+          .then(({ data, error }) => {
+            if (!error) setUsername(data.username)
+          })
+      } else {
+        setUsername(null)
+      }
     })
 
     return () => {
@@ -34,7 +64,7 @@ export function Navbar() {
   }
 
   return (
-    <nav >
+    <nav>
       {/* MOBILE */}
       <div className="sm:hidden flex flex-col w-full">
         <div className="flex items-center justify-end">
@@ -42,7 +72,7 @@ export function Navbar() {
             {user ? (
               <>
                 <button onClick={handleLogout} className="text-white text-xs px-2 py-2">
-                  Wyloguj się
+                  Wyloguj się {username || '...'}
                 </button>
                 <Link href="/panel">
                   <button className="text-white text-xs px-2 py-2">
@@ -107,7 +137,7 @@ export function Navbar() {
           {user ? (
             <>
               <button onClick={handleLogout} className="text-white text-xs px-2 py-2">
-                Wyloguj się
+                Wyloguj się {username || '...'}
               </button>
               <Link href="/panel">
                 <button className="text-white text-xs px-2 py-2">

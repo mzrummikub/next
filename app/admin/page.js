@@ -4,73 +4,153 @@ import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 
 export default function AdminPage() {
-  const [user, setUser] = useState(null);
+  const [sessionUser, setSessionUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [players, setPlayers] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [editData, setEditData] = useState({});
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     async function checkAdmin() {
-      // 1. Pobierz aktualną sesję
       const {
         data: { session },
-        error: sessionError,
       } = await supabase.auth.getSession();
 
-      if (sessionError) {
-        console.error('Błąd sesji:', sessionError);
-      }
-
-      // Jeśli nie ma zalogowanego usera, przekieruj na /login
-      if (!session || !session.user) {
+      if (!session?.user) {
         router.push('/login');
         return;
       }
 
-      // Zapisujemy użytkownika, by np. wyświetlić jego email
-      setUser(session.user);
+      setSessionUser(session.user);
 
-      // 2. Sprawdź w tabeli 'player', czy is_admin = true
-      const { data: playerData, error: playerError } = await supabase
+      const { data, error } = await supabase
         .from('player')
-        .select('is_admin')
+        .select('admin')
         .eq('user_id', session.user.id)
         .single();
 
-      if (playerError) {
-        console.error('Błąd przy pobieraniu is_admin:', playerError);
-        // Tutaj możesz dodać komunikat błędu lub przekierować
-      } else {
-        // Zapisz w state, czy jest adminem
-        setIsAdmin(!!playerData?.is_admin);
+      if (error || !data?.admin) {
+        router.push('/');
+        return;
       }
 
-      setLoading(false);
+      setIsAdmin(true);
+      fetchPlayers();
     }
 
     checkAdmin();
   }, [router]);
 
-  if (loading) {
-    return <div>Ładowanie...</div>;
+  async function fetchPlayers() {
+    const { data, error } = await supabase.from('player').select('*');
+    if (!error) setPlayers(data);
+    setLoading(false);
   }
+
+  const handleEditClick = (player) => {
+    setEditingId(player.id);
+    setEditData(player);
+  };
+
+  const handleChange = (e) => {
+    setEditData({ ...editData, [e.target.name]: e.target.value });
+  };
+
+  const handleSave = async () => {
+    const { error } = await supabase
+      .from('player')
+      .update(editData)
+      .eq('id', editingId);
+
+    if (!error) {
+      setEditingId(null);
+      fetchPlayers();
+    } else {
+      console.error('Błąd przy aktualizacji danych:', error);
+    }
+  };
+
+  if (loading) return <div className="p-4">Ładowanie...</div>;
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Panel Administratora</h1>
-      <p><strong>Użytkownik:</strong> {user.email}</p>
-      <p><strong>Czy admin?:</strong> {isAdmin ? 'Tak' : 'Nie'}</p>
-
-      {isAdmin ? (
-        <div className="mt-4">
-          <p>Możesz tu dodać funkcje lub widoki widoczne tylko dla admina.</p>
-          {/* Przykład: pobieranie wszystkich graczy, zatwierdzanie itd. */}
-        </div>
-      ) : (
-        <div className="mt-4 text-red-600">
-          Nie jesteś adminem.
-        </div>
-      )}
+      <h1 className="text-2xl font-bold mb-4">Panel administratora</h1>
+      <table className="w-full border text-sm">
+        <thead>
+          <tr className="bg-gray-200">
+            <th className="border p-2">Email</th>
+            <th className="border p-2">Imię</th>
+            <th className="border p-2">Nazwisko</th>
+            <th className="border p-2">Miasto</th>
+            <th className="border p-2">Województwo</th>
+            <th className="border p-2">Data urodzenia</th>
+            <th className="border p-2">Ranking</th>
+            <th className="border p-2">Zatwierdzony</th>
+            <th className="border p-2">Admin</th>
+            <th className="border p-2">Akcje</th>
+          </tr>
+        </thead>
+        <tbody>
+          {players.map((player) => (
+            <tr key={player.id} className="border">
+              <td className="border p-2">{player.email}</td>
+              <td className="border p-2">
+                {editingId === player.id ? (
+                  <input name="first_name" value={editData.first_name || ''} onChange={handleChange} className="w-full border p-1" />
+                ) : (
+                  player.first_name
+                )}
+              </td>
+              <td className="border p-2">
+                {editingId === player.id ? (
+                  <input name="last_name" value={editData.last_name || ''} onChange={handleChange} className="w-full border p-1" />
+                ) : (
+                  player.last_name
+                )}
+              </td>
+              <td className="border p-2">
+                {editingId === player.id ? (
+                  <input name="city" value={editData.city || ''} onChange={handleChange} className="w-full border p-1" />
+                ) : (
+                  player.city
+                )}
+              </td>
+              <td className="border p-2">
+                {editingId === player.id ? (
+                  <input name="province" value={editData.province || ''} onChange={handleChange} className="w-full border p-1" />
+                ) : (
+                  player.province
+                )}
+              </td>
+              <td className="border p-2">
+                {editingId === player.id ? (
+                  <input type="date" name="birthdate" value={editData.birthdate || ''} onChange={handleChange} className="w-full border p-1" />
+                ) : (
+                  player.birthdate
+                )}
+              </td>
+              <td className="border p-2">
+                {editingId === player.id ? (
+                  <input type="number" name="ranking" value={editData.ranking || 0} onChange={handleChange} className="w-full border p-1" />
+                ) : (
+                  player.ranking
+                )}
+              </td>
+              <td className="border p-2">{player.approved ? '✔️' : '❌'}</td>
+              <td className="border p-2">{player.is_admin ? '✔️' : '❌'}</td>
+              <td className="border p-2">
+                {editingId === player.id ? (
+                  <button onClick={handleSave} className="bg-green-500 text-white px-2 py-1 rounded">Zapisz</button>
+                ) : (
+                  <button onClick={() => handleEditClick(player)} className="bg-blue-500 text-white px-2 py-1 rounded">Edytuj</button>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
