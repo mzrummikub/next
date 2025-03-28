@@ -23,7 +23,7 @@ export default function RegisterPage() {
     if (error) {
       setMessage(error.message);
     } else {
-      setMessage('Konto utworzone! Sprawdź swoją skrzynkę e-mail, aby je potwierdzić.');
+      setMessage('Konto utworzone! Sprawdź swoją skrzynkę e-mail, aby potwierdzić konto.');
       setTimeout(() => router.push('/login'), 5000);
     }
   };
