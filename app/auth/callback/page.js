@@ -1,36 +1,26 @@
-'use client'
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
+'use client';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
+import { useRouter } from 'next/navigation';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-)
-
-export default function AuthCallbackPage() {
-  const router = useRouter()
+export default function CallbackPage() {
+  const [message, setMessage] = useState('Trwa weryfikacja...');
+  const router = useRouter();
 
   useEffect(() => {
-    const confirmUser = async () => {
-      const { data, error } = await supabase.auth.getSession()
-
-      if (error) {
-        console.error('Błąd sesji:', error)
-        return
-      }
-
-      if (data?.session) {
-        // Zalogowany po potwierdzeniu
-        router.push('/panel')
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setMessage('Twoje konto zostało aktywowane!');
+        setTimeout(() => router.push('/'), 3000);
       } else {
-        // Jeśli nie ma sesji – przekieruj do logowania
-        router.push('/login')
+        setMessage('Coś poszło nie tak. Spróbuj ponownie.');
       }
-    }
+    });
+  }, [router]);
 
-    confirmUser()
-  }, [router])
-
-  return <div>Trwa potwierdzanie konta...</div>
+  return (
+    <div className="max-w-md mx-auto p-6 mt-10 rounded shadow text-center">
+      <p>{message}</p>
+    </div>
+  );
 }
