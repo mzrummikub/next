@@ -7,13 +7,17 @@ export default function CallbackPage() {
   const router = useRouter();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
         router.push('/dashboard');
       } else {
         router.push('/login');
       }
     });
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, [router]);
 
   return (
