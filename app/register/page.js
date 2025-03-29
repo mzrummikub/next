@@ -38,7 +38,6 @@ export default function RegisterPage() {
     const userId = authData?.user?.id
 
     if (userId) {
-      // Dodajemy użytkownika do tabeli 'user'
       const { error: insertError } = await supabase.from('user').insert({
         id: userId,
         email,
@@ -52,9 +51,9 @@ export default function RegisterPage() {
         return
       }
 
-      // Wysyłka maila przez API
       const verificationLink = `https://mzrummikub.vercel.app/api/verify?token=${verificationToken}`
 
+      // Wyślij maila przez backend (Nodemailer API)
       const response = await fetch('/api/send-verification-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
