@@ -9,20 +9,31 @@ export default function AuthCallback() {
   const router = useRouter()
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data, error } = await supabase.auth.getUser()
+    const handleCallback = async () => {
+      // 1. Obsłuż token z URL (hash po kliknięciu w link z maila)
+      const { data, error } = await supabase.auth.getSessionFromUrl({
+        storeSession: true,
+      })
 
-      if (error || !data?.user) {
-        setMessage('Nie udało się zalogować użytkownika.')
-      } else {
+      if (error) {
+        setMessage('Błąd logowania: ' + error.message)
+        setLoading(false)
+        return
+      }
+
+      // 2. Sprawdź, czy użytkownik jest teraz zalogowany
+      const { data: userData } = await supabase.auth.getUser()
+      if (userData?.user) {
         setMessage('Zalogowano! Przekierowanie...')
         setTimeout(() => router.push('/panel'), 2000)
+      } else {
+        setMessage('Nie udało się zalogować użytkownika.')
       }
 
       setLoading(false)
     }
 
-    checkUser()
+    handleCallback()
   }, [router])
 
   return (
