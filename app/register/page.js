@@ -37,6 +37,9 @@ export default function RegisterPage() {
 
     const userId = authData?.user?.id
 
+    console.log('userId:', userId)
+    console.log('verificationToken:', verificationToken)
+
     if (userId) {
       const { error: insertError } = await supabase.from('user').insert({
         id: userId,
@@ -47,13 +50,13 @@ export default function RegisterPage() {
       })
 
       if (insertError) {
-        setMessage(`Błąd zapisu do bazy: ${insertError.message}`)
+        console.error('Błąd zapisu do bazy:', insertError)
+        setMessage(`Błąd zapisu danych: ${insertError.message}`)
         return
       }
 
       const verificationLink = `https://mzrummikub.vercel.app/api/verify?token=${verificationToken}`
 
-      // Wyślij maila przez backend (Nodemailer API)
       const response = await fetch('/api/send-verification-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

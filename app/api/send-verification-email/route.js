@@ -7,7 +7,7 @@ export async function POST(req) {
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT),
-    secure: false, // jeśli używasz portu 587
+    secure: false, 
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
@@ -23,13 +23,12 @@ export async function POST(req) {
         <h2>Witaj, ${username}!</h2>
         <p>Dziękujemy za rejestrację. Aby potwierdzić swoje konto, kliknij poniższy link:</p>
         <p><a href="${link}">${link}</a></p>
-        <p>Link ważny jest przez ograniczony czas.</p>
       `,
     })
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('❌ Błąd wysyłki maila:', error)
+    console.error('Błąd wysyłki maila:', error)
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }
 }
