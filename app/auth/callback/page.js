@@ -7,59 +7,69 @@ export default function AuthCallback() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState('')
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
-    const handleCallback = async () => {
-      // Odczytaj parametry z URL: token, type, (opcjonalnie email)
+    async function handleVerification() {
+      // Pobieramy parametry z URL
       const params = new URLSearchParams(window.location.search)
       const token = params.get('token')
       const type = params.get('type')
-      const email = params.get('email') // czasem email jest przekazywany
 
       if (!token || !type) {
-        setMessage('Brak wymaganych parametrów w URL.')
+        setMessage('❌ Brakuje parametrów w URL (token lub type).')
         setLoading(false)
         return
       }
 
-      // Używamy verifyOtp aby potwierdzić konto i utworzyć sesję
-      const { data, error } = await supabase.auth.verifyOtp({
-        token,
-        type, // powinno być 'signup'
-        email, // przekazujemy, jeśli dostępne
-      })
+      // Próba potwierdzenia tokenu
+      const { data, error } = await supabase.auth.verifyOtp({ token, type })
 
       if (error) {
-        // Jeśli wystąpił błąd, wyświetlamy komunikat
-        setMessage(`Błąd weryfikacji: ${error.message}`)
+        setMessage(`❌ Błąd potwierdzania tokenu: ${error.message}`)
         setLoading(false)
         return
       }
 
-      if (data?.session) {
-        setMessage('Konto potwierdzone! Logowanie...')
-        setTimeout(() => router.push('/panel'), 2000)
+      if (data.session) {
+        setMessage('✅ Konto potwierdzone, sesja utworzona. Przekierowanie do panelu...')
+        setUser(data.user)
+        // Automatyczne przekierowanie do panelu po 3 sekundach
+        setTimeout(() => router.push('/panel'), 3000)
       } else {
-        // Jeśli sesja nie została utworzona – konto potwierdzone, ale użytkownik musi się zalogować ręcznie
-        setMessage('Konto potwierdzone, proszę się zalogować.')
+        setMessage('✅ Konto potwierdzone, ale sesja nie została utworzona. Zaloguj się ręcznie.')
       }
+
       setLoading(false)
     }
 
-    handleCallback()
+    handleVerification()
   }, [router])
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-4 text-center">
-      <h1 className="text-2xl font-bold mb-4">Potwierdzanie konta...</h1>
-      {loading ? <p>Trwa weryfikacja...</p> : <p>{message}</p>}
-      {!loading && !message.includes('Logowanie') && (
-        <button
-          onClick={() => router.push('/login')}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
-        >
-          Przejdź do logowania
-        </button>
+    <div className="max-w-xl mx-auto mt-20 p-6 border rounded shadow">
+      <h1 className="text-2xl font-bold mb-4">🔍 Weryfikacja konta</h1>
+      {loading ? (
+        <p className="text-gray-600">⏳ Trwa potwierdzanie konta...</p>
+      ) : (
+        <>
+          <p className="text-gray-800">{message}</p>
+          {user && (
+            <div className="mt-4 text-sm text-left">
+              <p><strong>📧 Email:</strong> {user.email}</p>
+              <p><strong>🆔 User ID:</strong> {user.id}</p>
+              <p><strong>📅 Email potwierdzono:</strong> {user.email_confirmed_at || '❌ Brak'}</p>
+            </div>
+          )}
+          {!user && (
+            <button
+              onClick={() => router.push('/login')}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+            >
+              Przejdź do logowania
+            </button>
+          )}
+        </>
       )}
     </div>
   )
