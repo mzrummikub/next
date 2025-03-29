@@ -13,13 +13,14 @@ export default function RegisterPage() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setMessage('');
 
     if (password !== confirmPassword) {
       setMessage('Hasła się różnią.');
       return;
     }
 
-    // 1. Rejestracja użytkownika przez Supabase Auth
+    // 1. Rejestracja w auth.users
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -30,30 +31,32 @@ export default function RegisterPage() {
       return;
     }
 
-    // 2. Aktualizacja user_metadata – ustawienie nazwy użytkownika
-    const { error: updateError } = await supabase.auth.updateUser({
-      data: { username: username },
-    });
-    if (updateError) {
-      setMessage(updateError.message);
+    const userId = authData?.user?.id;
+
+    if (!userId) {
+      setMessage('Konto utworzone. Sprawdź e-mail i zaloguj się.');
       return;
     }
 
-    // 3. Dodanie dodatkowych danych do tabeli "user"
-    const userId = authData.user.id;
-    const { error: dbError } = await supabase
+    // 2. Dodanie do własnej tabeli "user"
+    const { error: insertError } = await supabase
       .from('user')
-      .insert([{ id: userId, email, username, role: 'user' }]);
+      .insert([
+        {
+          id: userId,
+          email: email,
+          username: username,
+          role: 'user',
+        },
+      ]);
 
-    if (dbError) {
-      setMessage(dbError.message);
+    if (insertError) {
+      setMessage(`Błąd dodawania do bazy: ${insertError.message}`);
       return;
     }
 
-    setMessage(
-      'Konto utworzone! Sprawdź skrzynkę e-mail, aby potwierdzić konto.'
-    );
-    setTimeout(() => router.push('/login'), 5000);
+    setMessage('Konto utworzone! Sprawdź swoją skrzynkę e-mail.');
+    setTimeout(() => router.push('/login'), 4000);
   };
 
   return (
