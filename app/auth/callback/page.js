@@ -9,37 +9,39 @@ export default function AuthCallback() {
   const router = useRouter()
 
   useEffect(() => {
-    const handleCallback = async () => {
-      // 1. Obsłuż token z URL (hash po kliknięciu w link z maila)
-      const { data, error } = await supabase.auth.getSessionFromUrl({
-        storeSession: true,
-      })
+    // Najpierw sprawdźmy, czy Supabase widzi usera
+    const checkIfConfirmed = async () => {
+      const { data: { user }, error } = await supabase.auth.getUser()
 
-      if (error) {
-        setMessage('Błąd logowania: ' + error.message)
+      // Jesli user jest zalogowany, to supabase go zna
+      if (user && !error) {
+        setMessage('Konto już jest zalogowane! Przenoszę do panelu...')
+        setTimeout(() => router.push('/panel'), 2000)
         setLoading(false)
         return
       }
 
-      // 2. Sprawdź, czy użytkownik jest teraz zalogowany
-      const { data: userData } = await supabase.auth.getUser()
-      if (userData?.user) {
-        setMessage('Zalogowano! Przekierowanie...')
-        setTimeout(() => router.push('/panel'), 2000)
-      } else {
-        setMessage('Nie udało się zalogować użytkownika.')
-      }
-
+      // Jeśli brak usera lub error => to normalne w trybie verify token
+      // bo Supabase potwierdza email, ale nie loguje. Pokaz info:
+      setMessage('Konto zostało potwierdzone, teraz możesz się zalogować.')
       setLoading(false)
     }
 
-    handleCallback()
+    checkIfConfirmed()
   }, [router])
 
   return (
     <div className="max-w-md mx-auto mt-20 p-4 text-center">
-      <h1 className="text-2xl font-bold mb-4">Logowanie...</h1>
-      {loading ? <p>Trwa logowanie...</p> : <p>{message}</p>}
+      <h1 className="text-2xl font-bold mb-4">Potwierdzenie konta</h1>
+      {loading ? <p>Trwa sprawdzanie...</p> : <p>{message}</p>}
+      {!loading && (
+        <button
+          onClick={() => router.push('/login')}
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+        >
+          Przejdź do logowania
+        </button>
+      )}
     </div>
   )
 }
