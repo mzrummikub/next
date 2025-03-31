@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 
@@ -165,7 +165,7 @@ export default function PanelPage() {
   });
 
   // Funkcja aktualizująca dane użytkownika (w panelu użytkownika)
-  const handleUpdate = async (e) => {
+  const handleUpdateUser = async (e) => {
     e.preventDefault();
     setUpdateMessage("");
 
@@ -258,7 +258,7 @@ export default function PanelPage() {
   };
 
   // Funkcja aktualizująca dane w wierszu tabeli Gracz (dla admina)
-  const handleGraczRowEdit = async (graczId) => {
+  const handleGraczSave = async (graczId) => {
     const edited = editGraczRows[graczId];
     if (!edited) return;
     const { error } = await supabase.from("gracz").update(edited).eq("id", graczId);
@@ -288,7 +288,7 @@ export default function PanelPage() {
       email: emailToUse,
       imie: newGraczImie,
       nazwisko: newGraczNazwisko,
-      // Pozostałe pola (miasto, województwo, rok_urodzenia) mogą być puste, ranking przyjmie wartość domyślną 1200
+      // Pozostałe pola mogą pozostać puste, ranking domyślny to 1200
     });
 
     if (error) {
@@ -298,7 +298,6 @@ export default function PanelPage() {
       setNewGraczEmail("");
       setNewGraczImie("");
       setNewGraczNazwisko("");
-      // Odśwież listę graczy
       const { data } = await supabase.from("gracz").select("*");
       setGracze(data);
     }
@@ -313,354 +312,352 @@ export default function PanelPage() {
   }
 
   return (
-    <div className="p-4 text-sm">
-      {/* Panel użytkownika */}
-      <div className="w-[800px] mx-auto bg-white p-6 rounded-lg shadow-md mb-8">
-        <h1 className="text-2xl font-bold mb-4">Panel użytkownika</h1>
-        {editMode ? (
-          <form onSubmit={handleUpdate} className="space-y-2">
-            <div>
-              <strong>Email:</strong>{" "}
-              <input
-                type="email"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                className="border p-1 rounded w-60"
-                required
-              />
-            </div>
-            <div>
-              <strong>Login:</strong>{" "}
-              <input
-                type="text"
-                value={newLogin}
-                onChange={(e) => setNewLogin(e.target.value)}
-                className="border p-1 rounded w-60"
-                required
-              />
-            </div>
-            <div>
-              <strong>Potwierdź hasło:</strong>{" "}
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="border p-1 rounded w-60"
-                required
-              />
-            </div>
-            <button type="submit" className="bg-green-500 text-white px-2 py-1 rounded text-xs">
-              Zapisz zmiany
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setEditMode(false);
-                setNewEmail(userData.email);
-                setNewLogin(userData.login);
-                setConfirmPassword("");
-              }}
-              className="bg-red-500 text-white px-2 py-1 rounded text-xs ml-2"
-            >
-              Anuluj
-            </button>
-          </form>
-        ) : (
-          <div className="space-y-2">
-            <p>
-              <strong>Email:</strong> {userData.email}
-            </p>
-            <p>
-              <strong>Login:</strong> {userData.login}
-            </p>
-            <p>
-              <strong>Ranga:</strong> {userData.ranga}
-            </p>
-            <button
-              onClick={() => setEditMode(true)}
-              className="bg-blue-500 text-white px-2 py-1 rounded text-xs"
-            >
-              Aktualizuj dane
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Panel administratora: dodatkowe menu */}
-      {userData.ranga === "admin" && (
+    <Suspense fallback={<div>Ładowanie...</div>}>
+      <div className="p-4 text-sm">
+        {/* Panel użytkownika */}
         <div className="w-[800px] mx-auto bg-white p-6 rounded-lg shadow-md mb-8">
-          <h2 className="text-xl font-bold mb-4">Panel administratora</h2>
-          <div className="flex gap-4 mb-4">
-            <button
-              onClick={() => setAdminMenuOption("users")}
-              className={`px-4 py-2 rounded ${adminMenuOption === "users" ? "bg-blue-600 text-white" : "bg-gray-200 text-black"}`}
-            >
-              Users
-            </button>
-            <button
-              onClick={() => setAdminMenuOption("orders")}
-              className={`px-4 py-2 rounded ${adminMenuOption === "orders" ? "bg-blue-600 text-white" : "bg-gray-200 text-black"}`}
-            >
-              Orders
-            </button>
-            <button
-              onClick={() => setAdminMenuOption("products")}
-              className={`px-4 py-2 rounded ${adminMenuOption === "products" ? "bg-blue-600 text-white" : "bg-gray-200 text-black"}`}
-            >
-              Products
-            </button>
-            <button
-              onClick={() => setAdminMenuOption("gracz")}
-              className={`px-4 py-2 rounded ${adminMenuOption === "gracz" ? "bg-blue-600 text-white" : "bg-gray-200 text-black"}`}
-            >
-              Gracz
-            </button>
-          </div>
+          <h1 className="text-2xl font-bold mb-4">Panel użytkownika</h1>
+          {editMode ? (
+            <form onSubmit={handleUpdateUser} className="space-y-2">
+              <div>
+                <strong>Email:</strong>{" "}
+                <input
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  className="border p-1 rounded w-60"
+                  required
+                />
+              </div>
+              <div>
+                <strong>Login:</strong>{" "}
+                <input
+                  type="text"
+                  value={newLogin}
+                  onChange={(e) => setNewLogin(e.target.value)}
+                  className="border p-1 rounded w-60"
+                  required
+                />
+              </div>
+              <div>
+                <strong>Potwierdź hasło:</strong>{" "}
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="border p-1 rounded w-60"
+                  required
+                />
+              </div>
+              <button type="submit" className="bg-green-500 text-white px-2 py-1 rounded text-xs">
+                Zapisz zmiany
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditMode(false);
+                  setNewEmail(userData.email);
+                  setNewLogin(userData.login);
+                  setConfirmPassword("");
+                }}
+                className="bg-red-500 text-white px-2 py-1 rounded text-xs ml-2"
+              >
+                Anuluj
+              </button>
+            </form>
+          ) : (
+            <div className="space-y-2">
+              <p>
+                <strong>Email:</strong> {userData.email}
+              </p>
+              <p>
+                <strong>Login:</strong> {userData.login}
+              </p>
+              <p>
+                <strong>Ranga:</strong> {userData.ranga}
+              </p>
+              <button
+                onClick={() => setEditMode(true)}
+                className="bg-blue-500 text-white px-2 py-1 rounded text-xs"
+              >
+                Aktualizuj dane
+              </button>
+            </div>
+          )}
+        </div>
 
-          {adminMenuOption === "users" && (
-            <div>
-              <h3 className="font-bold mb-2">Lista wszystkich użytkowników</h3>
-              {allUsers.length === 0 ? (
-                <p>Brak danych do wyświetlenia.</p>
-              ) : (
-                <table className="w-full table-auto border-collapse">
-                  <thead>
-                    <tr>
-                      <th className="border p-2 cursor-pointer" onClick={() => handleSort("id")}>
-                        ID {sortColumn === "id" && (sortOrder === "asc" ? "▲" : "▼")}
-                      </th>
-                      <th className="border p-2 cursor-pointer" onClick={() => handleSort("email")}>
-                        Email {sortColumn === "email" && (sortOrder === "asc" ? "▲" : "▼")}
-                      </th>
-                      <th className="border p-2 cursor-pointer" onClick={() => handleSort("login")}>
-                        Login {sortColumn === "login" && (sortOrder === "asc" ? "▲" : "▼")}
-                      </th>
-                      <th className="border p-2 cursor-pointer" onClick={() => handleSort("ranga")}>
-                        Ranga {sortColumn === "ranga" && (sortOrder === "asc" ? "▲" : "▼")}
-                      </th>
-                      <th className="border p-2">Akcje</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sortedUsers.map((user) => {
-                      const isEditing = adminEditRows[user.id]?.editing;
-                      return (
-                        <tr key={user.id}>
-                          <td className="border p-2">{user.id}</td>
-                          <td className="border p-2">
-                            {isEditing ? (
-                              <input
-                                type="text"
-                                value={adminEditRows[user.id]?.editedEmail || user.email}
-                                onChange={(e) =>
-                                  setAdminEditRows((prev) => ({
-                                    ...prev,
-                                    [user.id]: {
-                                      ...prev[user.id],
-                                      editing: true,
-                                      editedEmail: e.target.value,
-                                      editedLogin: prev[user.id]?.editedLogin || user.login,
-                                    },
-                                  }))
-                                }
-                                className="border p-1 rounded w-32 text-sm"
-                              />
-                            ) : (
-                              user.email
-                            )}
-                          </td>
-                          <td className="border p-2">
-                            {isEditing ? (
-                              <input
-                                type="text"
-                                value={adminEditRows[user.id]?.editedLogin || user.login}
-                                onChange={(e) =>
-                                  setAdminEditRows((prev) => ({
-                                    ...prev,
-                                    [user.id]: {
-                                      ...prev[user.id],
-                                      editing: true,
-                                      editedLogin: e.target.value,
-                                      editedEmail: prev[user.id]?.editedEmail || user.email,
-                                    },
-                                  }))
-                                }
-                                className="border p-1 rounded w-32 text-sm"
-                              />
-                            ) : (
-                              user.login
-                            )}
-                          </td>
-                          <td className="border p-2">{user.ranga}</td>
-                          <td className="border p-2">
-                            {isEditing ? (
-                              <>
-                                <button
-                                  onClick={() => handleAdminRowEdit(user.id)}
-                                  className="bg-green-500 text-white px-2 py-1 rounded text-xs mr-2"
-                                >
-                                  Zapisz
-                                </button>
+        {/* Panel administratora: dodatkowe menu */}
+        {userData.ranga === "admin" && (
+          <div className="w-[800px] mx-auto bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 className="text-xl font-bold mb-4">Panel administratora</h2>
+            <div className="flex gap-4 mb-4">
+              <button
+                onClick={() => setAdminMenuOption("users")}
+                className={`px-4 py-2 rounded ${adminMenuOption === "users" ? "bg-blue-600 text-white" : "bg-gray-200 text-black"}`}
+              >
+                Users
+              </button>
+              <button
+                onClick={() => setAdminMenuOption("orders")}
+                className={`px-4 py-2 rounded ${adminMenuOption === "orders" ? "bg-blue-600 text-white" : "bg-gray-200 text-black"}`}
+              >
+                Orders
+              </button>
+              <button
+                onClick={() => setAdminMenuOption("products")}
+                className={`px-4 py-2 rounded ${adminMenuOption === "products" ? "bg-blue-600 text-white" : "bg-gray-200 text-black"}`}
+              >
+                Products
+              </button>
+              <button
+                onClick={() => setAdminMenuOption("gracz")}
+                className={`px-4 py-2 rounded ${adminMenuOption === "gracz" ? "bg-blue-600 text-white" : "bg-gray-200 text-black"}`}
+              >
+                Gracz
+              </button>
+            </div>
+
+            {adminMenuOption === "users" && (
+              <div>
+                <h3 className="font-bold mb-2">Lista wszystkich użytkowników</h3>
+                {allUsers.length === 0 ? (
+                  <p>Brak danych do wyświetlenia.</p>
+                ) : (
+                  <table className="w-full table-auto border-collapse">
+                    <thead>
+                      <tr>
+                        <th className="border p-2 cursor-pointer" onClick={() => handleSort("id")}>
+                          ID {sortColumn === "id" && (sortOrder === "asc" ? "▲" : "▼")}
+                        </th>
+                        <th className="border p-2 cursor-pointer" onClick={() => handleSort("email")}>
+                          Email {sortColumn === "email" && (sortOrder === "asc" ? "▲" : "▼")}
+                        </th>
+                        <th className="border p-2 cursor-pointer" onClick={() => handleSort("login")}>
+                          Login {sortColumn === "login" && (sortOrder === "asc" ? "▲" : "▼")}
+                        </th>
+                        <th className="border p-2 cursor-pointer" onClick={() => handleSort("ranga")}>
+                          Ranga {sortColumn === "ranga" && (sortOrder === "asc" ? "▲" : "▼")}
+                        </th>
+                        <th className="border p-2">Akcje</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortedUsers.map((user) => {
+                        const isEditing = adminEditRows[user.id]?.editing;
+                        return (
+                          <tr key={user.id}>
+                            <td className="border p-2">{user.id}</td>
+                            <td className="border p-2">
+                              {isEditing ? (
+                                <input
+                                  type="text"
+                                  value={adminEditRows[user.id]?.editedEmail || user.email}
+                                  onChange={(e) =>
+                                    setAdminEditRows((prev) => ({
+                                      ...prev,
+                                      [user.id]: {
+                                        ...prev[user.id],
+                                        editing: true,
+                                        editedEmail: e.target.value,
+                                        editedLogin: prev[user.id]?.editedLogin || user.login,
+                                      },
+                                    }))
+                                  }
+                                  className="border p-1 rounded w-32 text-sm"
+                                />
+                              ) : (
+                                user.email
+                              )}
+                            </td>
+                            <td className="border p-2">
+                              {isEditing ? (
+                                <input
+                                  type="text"
+                                  value={adminEditRows[user.id]?.editedLogin || user.login}
+                                  onChange={(e) =>
+                                    setAdminEditRows((prev) => ({
+                                      ...prev,
+                                      [user.id]: {
+                                        ...prev[user.id],
+                                        editing: true,
+                                        editedLogin: e.target.value,
+                                        editedEmail: prev[user.id]?.editedEmail || user.email,
+                                      },
+                                    }))
+                                  }
+                                  className="border p-1 rounded w-32 text-sm"
+                                />
+                              ) : (
+                                user.login
+                              )}
+                            </td>
+                            <td className="border p-2">{user.ranga}</td>
+                            <td className="border p-2">
+                              {isEditing ? (
+                                <>
+                                  <button
+                                    onClick={() => handleAdminRowEdit(user.id)}
+                                    className="bg-green-500 text-white px-2 py-1 rounded text-xs mr-2"
+                                  >
+                                    Zapisz
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      setAdminEditRows((prev) => ({
+                                        ...prev,
+                                        [user.id]: { editing: false, editedEmail: user.email, editedLogin: user.login },
+                                      }))
+                                    }
+                                    className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+                                  >
+                                    Anuluj
+                                  </button>
+                                </>
+                              ) : (
                                 <button
                                   onClick={() =>
                                     setAdminEditRows((prev) => ({
                                       ...prev,
-                                      [user.id]: { editing: false, editedEmail: user.email, editedLogin: user.login },
+                                      [user.id]: { editing: true, editedEmail: user.email, editedLogin: user.login },
                                     }))
                                   }
-                                  className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+                                  className="bg-blue-500 text-white px-2 py-1 rounded text-xs"
                                 >
-                                  Anuluj
+                                  Edytuj
                                 </button>
-                              </>
-                            ) : (
-                              <button
-                                onClick={() =>
-                                  setAdminEditRows((prev) => ({
-                                    ...prev,
-                                    [user.id]: { editing: true, editedEmail: user.email, editedLogin: user.login },
-                                  }))
-                                }
-                                className="bg-blue-500 text-white px-2 py-1 rounded text-xs"
-                              >
-                                Edytuj
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          )}
-
-          {adminMenuOption === "orders" && (
-            <div>
-              <p>Funkcjonalność przeglądania i edycji tabeli Orders w trakcie wdrażania.</p>
-            </div>
-          )}
-
-          {adminMenuOption === "products" && (
-            <div>
-              <p>Funkcjonalność przeglądania i edycji tabeli Products w trakcie wdrażania.</p>
-            </div>
-          )}
-
-          {adminMenuOption === "gracz" && (
-            <div>
-              <h3 className="font-bold my-4">Tabela Gracz</h3>
-              {gracze.length === 0 ? (
-                <p>Brak rekordów w tabeli gracz.</p>
-              ) : (
-                <table className="w-full table-auto border-collapse text-xs">
-                  <thead>
-                    <tr>
-                      {[
-                        "id",
-                        "uid",
-                        "email",
-                        "imie",
-                        "nazwisko",
-                        "miasto",
-                        "wojewodztwo",
-                        "rok_urodzenia",
-                        "ranking",
-                      ].map((col) => (
-                        <th
-                          key={col}
-                          className="border p-1 cursor-pointer"
-                          onClick={() => handleGraczSort(col)}
-                        >
-                          {col}{" "}
-                          {graczSortColumn === col && (graczSortOrder === "asc" ? "▲" : "▼")}
-                        </th>
-                      ))}
-                      <th className="border p-1">Akcje</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sortedGracze.map((gracz) => {
-                      const isEditing = !!editGraczRows[gracz.id];
-                      return (
-                        <tr key={gracz.id}>
-                          {[
-                            "id",
-                            "uid",
-                            "email",
-                            "imie",
-                            "nazwisko",
-                            "miasto",
-                            "wojewodztwo",
-                            "rok_urodzenia",
-                            "ranking",
-                          ].map((field) => (
-                            <td key={field} className="border p-1">
-                              {isEditing && field !== "id" ? (
-                                <input
-                                  className="border px-1 rounded w-full"
-                                  value={editGraczRows[gracz.id]?.[field] || ""}
-                                  onChange={(e) =>
-                                    setEditGraczRows((prev) => ({
-                                      ...prev,
-                                      [gracz.id]: { ...prev[gracz.id], [field]: e.target.value },
-                                    }))
-                                  }
-                                />
-                              ) : (
-                                gracz[field] || ""
                               )}
                             </td>
-                          ))}
-                          <td className="border p-1">
-                            {isEditing ? (
-                              <>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            )}
+
+            {adminMenuOption === "orders" && (
+              <div>
+                <p>Funkcjonalność przeglądania i edycji tabeli Orders w trakcie wdrażania.</p>
+              </div>
+            )}
+
+            {adminMenuOption === "products" && (
+              <div>
+                <p>Funkcjonalność przeglądania i edycji tabeli Products w trakcie wdrażania.</p>
+              </div>
+            )}
+
+            {adminMenuOption === "gracz" && (
+              <div>
+                <h3 className="font-bold my-4">Tabela Gracz</h3>
+                {gracze.length === 0 ? (
+                  <p>Brak rekordów w tabeli gracz.</p>
+                ) : (
+                  <table className="w-full table-auto border-collapse text-xs">
+                    <thead>
+                      <tr>
+                        {[
+                          "id",
+                          "uid",
+                          "email",
+                          "imie",
+                          "nazwisko",
+                          "miasto",
+                          "wojewodztwo",
+                          "rok_urodzenia",
+                          "ranking",
+                        ].map((col) => (
+                          <th
+                            key={col}
+                            className="border p-1 cursor-pointer"
+                            onClick={() => handleGraczSort(col)}
+                          >
+                            {col} {graczSortColumn === col && (graczSortOrder === "asc" ? "▲" : "▼")}
+                          </th>
+                        ))}
+                        <th className="border p-1">Akcje</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortedGracze.map((gracz) => {
+                        const isEditing = !!editGraczRows[gracz.id];
+                        return (
+                          <tr key={gracz.id}>
+                            {[
+                              "id",
+                              "uid",
+                              "email",
+                              "imie",
+                              "nazwisko",
+                              "miasto",
+                              "wojewodztwo",
+                              "rok_urodzenia",
+                              "ranking",
+                            ].map((field) => (
+                              <td key={field} className="border p-1">
+                                {isEditing && field !== "id" ? (
+                                  <input
+                                    className="border px-1 rounded w-full"
+                                    value={editGraczRows[gracz.id]?.[field] || ""}
+                                    onChange={(e) =>
+                                      setEditGraczRows((prev) => ({
+                                        ...prev,
+                                        [gracz.id]: { ...prev[gracz.id], [field]: e.target.value },
+                                      }))
+                                    }
+                                  />
+                                ) : (
+                                  gracz[field] || ""
+                                )}
+                              </td>
+                            ))}
+                            <td className="border p-1">
+                              {isEditing ? (
+                                <>
+                                  <button
+                                    className="bg-green-500 text-white text-xs px-2 py-1 mr-1 rounded"
+                                    onClick={() => handleGraczSave(gracz.id)}
+                                  >
+                                    Zapisz
+                                  </button>
+                                  <button
+                                    className="bg-red-500 text-white text-xs px-2 py-1 rounded"
+                                    onClick={() =>
+                                      setEditGraczRows((prev) => ({ ...prev, [gracz.id]: undefined }))
+                                    }
+                                  >
+                                    Anuluj
+                                  </button>
+                                </>
+                              ) : (
                                 <button
-                                  className="bg-green-500 text-white text-xs px-2 py-1 mr-1 rounded"
-                                  onClick={() => handleGraczRowEdit(gracz.id)}
-                                >
-                                  Zapisz
-                                </button>
-                                <button
-                                  className="bg-red-500 text-white text-xs px-2 py-1 rounded"
+                                  className="bg-blue-500 text-white text-xs px-2 py-1 rounded"
                                   onClick={() =>
-                                    setEditGraczRows((prev) => ({
-                                      ...prev,
-                                      [gracz.id]: undefined,
-                                    }))
+                                    setEditGraczRows((prev) => ({ ...prev, [gracz.id]: gracz }))
                                   }
                                 >
-                                  Anuluj
+                                  Edytuj
                                 </button>
-                              </>
-                            ) : (
-                              <button
-                                className="bg-blue-500 text-white text-xs px-2 py-1 rounded"
-                                onClick={() =>
-                                  setEditGraczRows((prev) => ({ ...prev, [gracz.id]: gracz }))
-                                }
-                              >
-                                Edytuj
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
-      {updateMessage && (
-        <div className="w-[800px] mx-auto mt-4">
-          <p className="text-center text-green-600">{updateMessage}</p>
-        </div>
-      )}
-    </div>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+  
+        {updateMessage && (
+          <div className="w-[800px] mx-auto mt-4">
+            <p className="text-center text-green-600">{updateMessage}</p>
+          </div>
+        )}
+      </div>
+    </Suspense>
   );
 }
