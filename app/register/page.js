@@ -9,6 +9,7 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
+  const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -19,9 +20,13 @@ export default function RegisterPage() {
       setMessage("Hasła nie są identyczne!");
       return;
     }
+    // Rejestracja w Auth z dodatkowym user_metadata (display_name)
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: { display_name: login } // zapisujemy login w user_metadata
+      }
     });
     if (error) {
       setMessage(error.message);
@@ -42,6 +47,16 @@ export default function RegisterPage() {
               className="w-full border border-gray-300 p-2 rounded"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 font-semibold mb-1">Login:</label>
+            <input
+              type="text"
+              className="w-full border border-gray-300 p-2 rounded"
+              value={login}
+              onChange={(e) => setLogin(e.target.value)}
               required
             />
           </div>
