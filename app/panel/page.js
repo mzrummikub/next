@@ -140,7 +140,7 @@ export default function PanelPage() {
 
   if (!session || !userRecordChecked || !userData) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="flex items-center justify-center">
         <p>Ładowanie...</p>
       </div>
     );
