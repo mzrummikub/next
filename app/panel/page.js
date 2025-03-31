@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -13,11 +14,15 @@ export default function PanelPage() {
   const [userRecordChecked, setUserRecordChecked] = useState(false);
   const [userData, setUserData] = useState(null);
   const [allUsers, setAllUsers] = useState([]);
-  const [adminEditRows, setAdminEditRows] = useState({});
   const [updateMessage, setUpdateMessage] = useState("");
+  const [editMode, setEditMode] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [newLogin, setNewLogin] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [adminEditRows, setAdminEditRows] = useState({});
   const router = useRouter();
 
-  // Pobierz aktywną sesję
+  // Pobierz sesję
   useEffect(() => {
     const getSession = async () => {
       const {
@@ -32,19 +37,18 @@ export default function PanelPage() {
     getSession();
   }, [router]);
 
-  // Sprawdź lub wstaw rekord w tabeli "users" po pełnym uwierzytelnieniu
+  // Sprawdź lub wstaw rekord w tabeli "users"
   useEffect(() => {
     const checkOrInsertUserRecord = async () => {
       if (!session || userRecordChecked) return;
       const userId = session.user.id;
-      // Sprawdzenie czy rekord już istnieje
       const { data, error } = await supabase
         .from("users")
         .select("*")
         .eq("id", userId)
         .single();
       if (error || !data) {
-        // Ustaw domyślny login na podstawie user_metadata.display_name lub części emaila
+        // Ustaw domyślny login na podstawie display_name lub części emaila
         const defaultLogin =
           session.user.user_metadata.display_name ||
           session.user.email.split("@")[0];
@@ -62,7 +66,7 @@ export default function PanelPage() {
     checkOrInsertUserRecord();
   }, [session, userRecordChecked]);
 
-  // Pobierz dane użytkownika z tabeli "users"
+  // Pobierz dane użytkownika
   useEffect(() => {
     const fetchUserData = async () => {
       if (!session) return;
@@ -75,12 +79,14 @@ export default function PanelPage() {
         console.error("Błąd pobierania danych użytkownika:", error);
       } else {
         setUserData(data);
+        setNewEmail(data.email);
+        setNewLogin(data.login);
       }
     };
     fetchUserData();
   }, [session, userRecordChecked]);
 
-  // Jeśli użytkownik ma rolę "admin", pobierz wszystkie rekordy z tabeli "users"
+  // Pobierz dane wszystkich użytkowników dla admina
   useEffect(() => {
     const fetchAllUsers = async () => {
       if (!userData || userData.ranga !== "admin") return;
@@ -94,35 +100,50 @@ export default function PanelPage() {
     fetchAllUsers();
   }, [userData]);
 
-  // Aktualizacja danych dla zwykłego użytkownika (edytowanie własnego loginu)
-  const handleBasicUpdate = async (e) => {
+  const handleUpdate = async (e) => {
     e.preventDefault();
-    if (!userData) return;
-    const { error } = await supabase
-      .from("users")
-      .update({ login: userData.login })
-      .eq("id", session.user.id);
-    if (error) {
-      setUpdateMessage(error.message);
-    } else {
-      setUpdateMessage("Dane zaktualizowane!");
-      // Odśwież dane użytkownika
-      const { data } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", session.user.id)
-        .single();
-      setUserData(data);
+    setUpdateMessage("");
+  
+    const res = await fetch("/api/update-user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: newEmail,
+        login: newLogin,
+        password: confirmPassword,
+        userId: session.user.id,
+      }),
+    });
+  
+    const result = await res.json();
+  
+    if (!res.ok) {
+      setUpdateMessage("Błąd: " + (result.error || "Nie udało się zaktualizować danych."));
+      return;
     }
+  
+    setUpdateMessage("Dane zostały zaktualizowane!");
+    setEditMode(false);
+    setConfirmPassword("");
+  
+    // Odśwież dane
+    const { data } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", session.user.id)
+      .single();
+    setUserData(data);
   };
+  
+  
 
-  // Aktualizacja danych w tabeli dla admina (edycja loginu w wierszu)
+  // Funkcja aktualizująca dane w wierszu tabeli dla admina (bez potwierdzania hasłem)
   const handleAdminRowEdit = async (userId) => {
-    const newLogin = adminEditRows[userId]?.editedLogin;
-    if (!newLogin) return;
+    const newLoginValue = adminEditRows[userId]?.editedLogin;
+    if (!newLoginValue) return;
     const { error } = await supabase
       .from("users")
-      .update({ login: newLogin })
+      .update({ login: newLoginValue })
       .eq("id", userId);
     if (error) {
       setUpdateMessage(error.message);
@@ -130,9 +151,8 @@ export default function PanelPage() {
       setUpdateMessage("Dane użytkownika zaktualizowane!");
       setAdminEditRows((prev) => ({
         ...prev,
-        [userId]: { editing: false, editedLogin: newLogin },
+        [userId]: { editing: false, editedLogin: newLoginValue },
       }));
-      // Odśwież całą listę użytkowników
       const { data } = await supabase.from("users").select("*");
       setAllUsers(data);
     }
@@ -148,49 +168,82 @@ export default function PanelPage() {
 
   return (
     <div className="p-4 text-sm">
-      {/* Panel dla użytkownika */}
+      {/* Panel użytkownika */}
       <div className="max-w-4xl mx-auto p-6 rounded-lg shadow-md mb-8">
         <h1 className="text-2xl font-bold mb-4">Panel użytkownika</h1>
-        <div className="space-y-2">
-          <p>
-            <strong>Email:</strong> {userData.email}
-          </p>
-          <p>
-            <strong>Login:</strong>{" "}
-            <input
-              type="text"
-              value={userData.login}
-              onChange={(e) =>
-                setUserData({ ...userData, login: e.target.value })
-              }
-              className="border p-1 rounded"
-            />
-          </p>
-          <p>
-            <strong>Ranga:</strong> {userData.ranga}
-          </p>
-          <p>
-            <strong>Data utworzenia:</strong>{" "}
-            {new Date(userData.created_at).toLocaleString()}
-          </p>
-          <p>
-            <strong>Ostatnie logowanie:</strong>{" "}
-            {userData.last_login
-              ? new Date(userData.last_login).toLocaleString()
-              : "Brak"}
-          </p>
-          <button
-            onClick={handleBasicUpdate}
-            className="bg-blue-500 text-white px-2 py-1 rounded text-xs"
-          >
-            Zapisz zmiany
-          </button>
-        </div>
+        {editMode ? (
+          <form onSubmit={handleUpdate} className="space-y-2">
+            <div>
+              <strong>Email:</strong>{" "}
+              <input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                className="border p-1 rounded w-60"
+                required
+              />
+            </div>
+            <div>
+              <strong>Login:</strong>{" "}
+              <input
+                type="text"
+                value={newLogin}
+                onChange={(e) => setNewLogin(e.target.value)}
+                className="border p-1 rounded w-60"
+                required
+              />
+            </div>
+            <div>
+              <strong>Potwierdź hasło:</strong>{" "}
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="border p-1 rounded w-60"
+                required
+              />
+            </div>
+            <button type="submit" className="bg-green-500 text-white px-2 py-1 rounded text-xs">
+              Zapisz zmiany
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEditMode(false);
+                setNewEmail(userData.email);
+                setNewLogin(userData.login);
+                setConfirmPassword("");
+              }}
+              className="bg-red-500 text-white px-2 py-1 rounded text-xs ml-2"
+            >
+              Anuluj
+            </button>
+          </form>
+        ) : (
+          <div className="space-y-2">
+            <p>
+              <strong>Email:</strong> {userData.email}
+            </p>
+            <p>
+              <strong>Login:</strong> {userData.login}
+            </p>
+            <p>
+              <strong>Ranga:</strong> {userData.ranga}
+            </p>
+            
+            <button
+              onClick={() => setEditMode(true)}
+              className="bg-blue-500 text-white px-2 py-1 rounded text-xs"
+            >
+              Aktualizuj dane
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Panel administratora: wyświetla tabelę wszystkich użytkowników */}
+      {/* Panel administratora: tabela wszystkich użytkowników */}
       {userData.ranga === "admin" && (
-        <div className="max-w-4xl mx-auto p-6 rounded-lg shadow-md">
+        <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-bold mb-4">Lista wszystkich użytkowników</h2>
           {allUsers.length === 0 ? (
             <p>Brak danych do wyświetlenia.</p>
@@ -202,8 +255,8 @@ export default function PanelPage() {
                   <th className="border p-2">Email</th>
                   <th className="border p-2">Login</th>
                   <th className="border p-2">Ranga</th>
-                  <th className="border p-2">Data utworzenia</th>
-                  <th className="border p-2">Ostatnie logowanie</th>
+                  
+                  
                   <th className="border p-2">Akcje</th>
                 </tr>
               </thead>
@@ -225,19 +278,15 @@ export default function PanelPage() {
                                 [user.id]: { editing: true, editedLogin: e.target.value },
                               }))
                             }
-                            className="border p-1 rounded w-32"
+                            className="border p-1 rounded w-32 text-sm"
                           />
                         ) : (
                           user.login
                         )}
                       </td>
                       <td className="border p-2">{user.ranga}</td>
-                      <td className="border p-2">
-                        {new Date(user.created_at).toLocaleString()}
-                      </td>
-                      <td className="border p-2">
-                        {user.last_login ? new Date(user.last_login).toLocaleString() : "Brak"}
-                      </td>
+                     
+                     
                       <td className="border p-2">
                         {isEditing ? (
                           <>

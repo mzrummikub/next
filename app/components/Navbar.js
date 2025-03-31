@@ -5,16 +5,22 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import '@/styles/globals.css';
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+
 
 export function Navbar() {
   const [user, setUser] = useState(null);
   const [login, setLogin] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const router = useRouter(); // Inicjalizacja routera
+
+  // Funkcja obsługująca wylogowanie
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/"); // Przekierowanie do strony głównej po wylogowaniu
+  };
 
   useEffect(() => {
     const getUser = async () => {
@@ -60,10 +66,6 @@ export function Navbar() {
     };
   }, []);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
-
   return (
     <nav>
       {/* MOBILE */}
@@ -73,7 +75,7 @@ export function Navbar() {
             {user ? (
               <>
                 <button onClick={handleLogout} className="text-white text-xs px-2 py-2">
-                  Wyloguj się {login || '...'}
+                  Wyloguj: {login || '...'}
                 </button>
                 <Link href="/panel">
                   <button className="text-white text-xs px-2 py-2">
@@ -112,6 +114,7 @@ export function Navbar() {
             alt="Logo"
             width={640}
             height={0}
+            priority
             className="w-full max-w-[640px] h-auto"
           />
         </div>
@@ -138,7 +141,7 @@ export function Navbar() {
           {user ? (
             <>
               <button onClick={handleLogout} className="text-white text-xs px-2 py-2">
-                Wyloguj się {login || '...'}
+                Wyloguj: {login || '...'}
               </button>
               <Link href="/panel">
                 <button className="text-white text-xs px-2 py-2">
@@ -168,6 +171,7 @@ export function Navbar() {
             alt="Logo"
             width={640}
             height={0}
+            priority
             className="w-full max-w-[640px] h-auto"
           />
         </div>
