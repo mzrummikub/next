@@ -147,9 +147,9 @@ export default function PanelPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 text-sm">
+    <div className="p-4 text-sm">
       {/* Panel dla użytkownika */}
-      <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md mb-8">
+      <div className="max-w-4xl mx-auto p-6 rounded-lg shadow-md mb-8">
         <h1 className="text-2xl font-bold mb-4">Panel użytkownika</h1>
         <div className="space-y-2">
           <p>
