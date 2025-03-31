@@ -396,18 +396,7 @@ export default function PanelPageContent() {
             >
               Users
             </button>
-            <button
-              onClick={() => setAdminMenuOption("orders")}
-              className={`px-4 py-2 rounded ${adminMenuOption === "orders" ? "bg-blue-600 text-white" : "bg-gray-200 text-black"}`}
-            >
-              Orders
-            </button>
-            <button
-              onClick={() => setAdminMenuOption("products")}
-              className={`px-4 py-2 rounded ${adminMenuOption === "products" ? "bg-blue-600 text-white" : "bg-gray-200 text-black"}`}
-            >
-              Products
-            </button>
+            
             <button
               onClick={() => setAdminMenuOption("gracz")}
               className={`px-4 py-2 rounded ${adminMenuOption === "gracz" ? "bg-blue-600 text-white" : "bg-gray-200 text-black"}`}
