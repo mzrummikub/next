@@ -12,6 +12,19 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
 
+// Jeśli użytkownik już jest zalogowany, przekieruj na /panel
+  useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session) {
+        router.push("/panel");
+      }
+    };
+    checkSession();
+  }, [router]);
+  
   const handleLogin = async (e) => {
     e.preventDefault();
     setMessage('');
