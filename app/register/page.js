@@ -9,7 +9,6 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
-  const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -20,31 +19,13 @@ export default function RegisterPage() {
       setMessage("Hasła nie są identyczne!");
       return;
     }
-    // Rejestracja w auth z dodatkowym user_metadata (ustawiamy ranga na "user")
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: { ranga: "user" }
-      }
     });
     if (error) {
       setMessage(error.message);
     } else {
-      // Po rejestracji w auth dodajemy rekord do tabeli users
-      const userId = data.user?.id;
-      if (userId) {
-        const { error: insertError } = await supabase.from("users").insert({
-          id: userId,
-          email: email,
-          login: login
-          // kolumna ranga przyjmie domyślną wartość "user" zdefiniowaną w tabeli
-        });
-        if (insertError) {
-          setMessage(insertError.message);
-          return;
-        }
-      }
       setMessage("Rejestracja zakończona! Sprawdź swój email w celu weryfikacji konta.");
     }
   };
@@ -61,16 +42,6 @@ export default function RegisterPage() {
               className="w-full border border-gray-300 p-2 rounded"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-semibold mb-1">Login:</label>
-            <input
-              type="text"
-              className="w-full border border-gray-300 p-2 rounded"
-              value={login}
-              onChange={(e) => setLogin(e.target.value)}
               required
             />
           </div>
