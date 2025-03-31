@@ -1,67 +1,68 @@
-'use client'
-import { useState, useEffect } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { createClient } from '@supabase/supabase-js'
-import '@/styles/globals.css'
+"use client";
+
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { createClient } from '@supabase/supabase-js';
+import '@/styles/globals.css';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-)
+);
 
 export function Navbar() {
-  const [user, setUser] = useState(null)
-  const [username, setUsername] = useState(null)
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [user, setUser] = useState(null);
+  const [login, setLogin] = useState(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
 
       if (user) {
-        // Pobieramy dane z tabeli "user", na podstawie id z auth.users
+        // Używamy tabeli "users" i pobieramy kolumnę "login"
         const { data, error } = await supabase
-          .from('user')
-          .select('username')
+          .from('users')
+          .select('login')
           .eq('id', user.id)
-          .single()
+          .single();
 
         if (error) {
-          console.error('Błąd przy pobieraniu username z tabeli user:', error)
+          console.error('Błąd przy pobieraniu login z tabeli users:', error);
         } else {
-          setUsername(data.username)
+          setLogin(data.login);
         }
       }
-    }
+    };
 
-    getUser()
+    getUser();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session?.user || null)
+      setUser(session?.user || null);
       if (session?.user) {
         supabase
-          .from('user')
-          .select('username')
+          .from('users')
+          .select('login')
           .eq('id', session.user.id)
           .single()
           .then(({ data, error }) => {
-            if (!error) setUsername(data.username)
-          })
+            if (!error) setLogin(data.login);
+          });
       } else {
-        setUsername(null)
+        setLogin(null);
       }
-    })
+    });
 
     return () => {
-      authListener?.subscription.unsubscribe()
-    }
-  }, [])
+      authListener?.subscription.unsubscribe();
+    };
+  }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-  }
+    await supabase.auth.signOut();
+  };
 
   return (
     <nav>
@@ -72,7 +73,7 @@ export function Navbar() {
             {user ? (
               <>
                 <button onClick={handleLogout} className="text-white text-xs px-2 py-2">
-                  Wyloguj się {username || '...'}
+                  Wyloguj się {login || '...'}
                 </button>
                 <Link href="/panel">
                   <button className="text-white text-xs px-2 py-2">
@@ -137,7 +138,7 @@ export function Navbar() {
           {user ? (
             <>
               <button onClick={handleLogout} className="text-white text-xs px-2 py-2">
-                Wyloguj się {username || '...'}
+                Wyloguj się {login || '...'}
               </button>
               <Link href="/panel">
                 <button className="text-white text-xs px-2 py-2">
@@ -174,5 +175,5 @@ export function Navbar() {
 
       <hr className="w-full border-t border-gray-300 mt-4" />
     </nav>
-  )
+  );
 }

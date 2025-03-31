@@ -35,6 +35,13 @@ export default function Sidebar() {
               <button className="w-full px-4 py-2 bg-blue-600 rounded">Logowanie</button>
             </Link>
           </li>
+
+           {/* PANEL */}
+           <li>
+            <Link href="/panel">
+              <button className="w-full px-4 py-2 bg-blue-600 rounded">Panel gracza</button>
+            </Link>
+          </li>
         </ul>
       </aside>
 
