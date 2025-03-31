@@ -314,7 +314,7 @@ export default function PanelPageContent() {
   return (
     <div className="p-4 text-sm">
       {/* Panel użytkownika */}
-      <div className="w-[800px] mx-auto bg-white p-6 rounded-lg shadow-md mb-8">
+      <div className="w-[800px] mx-auto p-6 rounded-lg shadow-md mb-8">
         <h1 className="text-2xl font-bold mb-4">Panel użytkownika</h1>
         {editMode ? (
           <form onSubmit={handleUpdateUser} className="space-y-2">
@@ -387,7 +387,7 @@ export default function PanelPageContent() {
 
       {/* Panel administratora: dodatkowe menu */}
       {userData.ranga === "admin" && (
-        <div className="w-[800px] mx-auto bg-white p-6 rounded-lg shadow-md mb-8">
+        <div className="w-[800px] mx-auto p-6 rounded-lg shadow-md mb-8">
           <h2 className="text-xl font-bold mb-4">Panel administratora</h2>
           <div className="flex gap-4 mb-4">
             <button
