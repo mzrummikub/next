@@ -1,8 +1,7 @@
 "use client";
 
-
-import { useState } from 'react';
-import { createClient } from '@supabase/supabase-js'
+import { useState, useEffect } from "react";
+import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -10,11 +9,12 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const router = useRouter();
 
-// Jeśli użytkownik już jest zalogowany, przekieruj na /panel
+  // Jeśli użytkownik już jest zalogowany, przekieruj na /panel
   useEffect(() => {
     const checkSession = async () => {
       const {
@@ -26,25 +26,25 @@ export default function LoginPage() {
     };
     checkSession();
   }, [router]);
-  
+
   const handleLogin = async (e) => {
     e.preventDefault();
-    setMessage('');
-    // Używamy metody logowania przy pomocy hasła
+    setMessage("");
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
     if (error) {
-      // Jeśli otrzymamy komunikat o niepoprawnych danych, wyświetlamy spersonalizowaną wiadomość
-      if (error.message.toLowerCase().includes('invalid login credentials')) {
-        setMessage('Niepoprawny email lub hasło.');
+      if (error.message.toLowerCase().includes("invalid login credentials")) {
+        setMessage("Niepoprawny email lub hasło.");
       } else {
         setMessage(error.message);
       }
     } else {
-      setMessage('Zalogowano pomyślnie!');
-      // Możesz dodać przekierowanie, np. router.push('/dashboard');
+      setMessage("Zalogowano pomyślnie!");
+      setTimeout(() => {
+        router.push("/panel");
+      }, 2000);
     }
   };
 
@@ -54,7 +54,9 @@ export default function LoginPage() {
         <h2 className="text-2xl font-bold text-center mb-6">Logowanie</h2>
         <form onSubmit={handleLogin}>
           <div className="mb-4">
-            <label className="block text-gray-700 font-semibold mb-1">Email:</label>
+            <label className="block text-gray-700 font-semibold mb-1">
+              Email:
+            </label>
             <input
               type="email"
               className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500"
@@ -64,7 +66,9 @@ export default function LoginPage() {
             />
           </div>
           <div className="mb-6">
-            <label className="block text-gray-700 font-semibold mb-1">Hasło:</label>
+            <label className="block text-gray-700 font-semibold mb-1">
+              Hasło:
+            </label>
             <input
               type="password"
               className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500"
