@@ -190,7 +190,7 @@ export default function PanelPage() {
 
       {/* Panel administratora: wyświetla tabelę wszystkich użytkowników */}
       {userData.ranga === "admin" && (
-        <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <div className="max-w-4xl mx-auto p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-bold mb-4">Lista wszystkich użytkowników</h2>
           {allUsers.length === 0 ? (
             <p>Brak danych do wyświetlenia.</p>
