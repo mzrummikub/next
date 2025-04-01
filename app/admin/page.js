@@ -4,37 +4,46 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function AdminPanel() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("stats"); // "stats" lub "explore"
   const [stats, setStats] = useState(null);
   const [exploreTable, setExploreTable] = useState("users"); // domyślnie "users"
   const [exploreData, setExploreData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // Wczytaj statystyki przy starcie
+  // Pobierz statystyki z API
   const fetchStats = async () => {
     try {
       const res = await fetch("/api/admin/stats");
       const json = await res.json();
-      setStats(json.stats);
+      if (json.error) {
+        setErrorMessage("Błąd API: " + json.error);
+      } else {
+        setStats(json.stats);
+      }
     } catch (err) {
-      console.error("Błąd pobierania statystyk:", err.message);
+      setErrorMessage("Błąd pobierania statystyk: " + err.message);
     }
   };
 
-  // Wczytaj dane z wybranej tabeli
+  // Pobierz dane z wybranej tabeli
   const fetchExploreData = async (table) => {
     try {
       const res = await fetch(`/api/admin/explore?table=${encodeURIComponent(table)}`);
       const json = await res.json();
-      setExploreData(json.data);
+      if (json.error) {
+        setErrorMessage("Błąd API: " + json.error);
+      } else {
+        setExploreData(json.data);
+      }
     } catch (err) {
-      console.error("Błąd pobierania danych z tabeli:", err.message);
+      setErrorMessage("Błąd pobierania danych: " + err.message);
     }
   };
 
   useEffect(() => {
-    // Przy starcie pobieramy statystyki
+    // Na starcie pobierz statystyki
     fetchStats().then(() => setLoading(false));
   }, []);
 
@@ -44,20 +53,21 @@ export default function AdminPanel() {
     }
   }, [activeTab, exploreTable]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p>Ładowanie...</p>
-      </div>
-    );
-  }
-
+  // Prosty UI panelu administratora
   return (
     <div className="p-4">
       <h1 className="text-3xl font-bold mb-4">Panel Administratora</h1>
+      {errorMessage && (
+        <div className="mb-4 p-2 bg-red-100 text-red-600 rounded">
+          {errorMessage}
+        </div>
+      )}
       <div className="mb-4">
         <button
-          onClick={() => setActiveTab("stats")}
+          onClick={() => {
+            setActiveTab("stats");
+            setErrorMessage("");
+          }}
           className={`px-4 py-2 mr-2 rounded ${
             activeTab === "stats" ? "bg-blue-600 text-white" : "bg-gray-200 text-black"
           }`}
@@ -65,7 +75,10 @@ export default function AdminPanel() {
           Statystyki
         </button>
         <button
-          onClick={() => setActiveTab("explore")}
+          onClick={() => {
+            setActiveTab("explore");
+            setErrorMessage("");
+          }}
           className={`px-4 py-2 rounded ${
             activeTab === "explore" ? "bg-blue-600 text-white" : "bg-gray-200 text-black"
           }`}
