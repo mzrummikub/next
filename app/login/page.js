@@ -44,7 +44,7 @@ export default function LoginPage() {
       setMessage("Zalogowano pomyślnie!");
       setTimeout(() => {
         router.push("/panel");
-      }, 2000);
+      }, 1000);
     }
   };
 
