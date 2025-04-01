@@ -180,7 +180,7 @@ export default function PanelPageContent() {
     return graczSortOrder === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA);
   });
 
-  // Aktualizacja danych użytkownika (panel użytkownika)
+  // Funkcja aktualizująca dane użytkownika (panel użytkownika)
   const handleUpdateUser = async (e) => {
     e.preventDefault();
     setUpdateMessage("");
@@ -320,11 +320,17 @@ export default function PanelPageContent() {
   // Admin Gracz - save all edited rows
   const handleSaveGraczeEdits = async () => {
     for (let edited of editedGracze) {
-      await supabase.from("gracz").update(edited).eq("id", edited.id);
+      const { error } = await supabase.from("gracz").update(edited).eq("id", edited.id);
+      if (error) {
+        setUpdateMessage("Błąd przy aktualizacji rekordu o ID " + edited.id + ": " + error.message);
+        return;
+      }
     }
     const { data, error } = await supabase.from("gracz").select("*");
     if (!error) {
       setGracze(data);
+    } else {
+      setUpdateMessage("Błąd przy odświeżaniu danych: " + error.message);
     }
     setIsEditingGracze(false);
   };
@@ -619,6 +625,7 @@ export default function PanelPageContent() {
                                 }}
                                 className="border px-1 rounded w-full"
                               >
+                                <option value="">(pusty)</option>
                                 {wojewodztwa.map((option) => (
                                   <option key={option} value={option}>
                                     {option}
@@ -653,6 +660,7 @@ export default function PanelPageContent() {
           )}
         </div>
       )}
+
       {updateMessage && (
         <div className="w-[800px] mx-auto mt-4">
           <p className="text-center text-green-600">{updateMessage}</p>
