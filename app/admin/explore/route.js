@@ -10,7 +10,7 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const table = searchParams.get("table");
   
-  // Dozwolone tabele – aby zabezpieczyć przed SQL injection
+  // Dozwolone tabele – zabezpieczenie przed nieautoryzowanym dostępem
   const allowedTables = ["auth.users", "users", "gracz"];
   if (!table || !allowedTables.includes(table)) {
     return NextResponse.json({ error: "Nieprawidłowa tabela" }, { status: 400 });
