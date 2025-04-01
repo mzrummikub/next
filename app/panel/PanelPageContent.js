@@ -9,7 +9,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function PanelPageContent() {
-  // Stany dla sesji i użytkownika
+  // Stany dla sesji i danych użytkownika
   const [session, setSession] = useState(null);
   const [userRecordChecked, setUserRecordChecked] = useState(false);
   const [userData, setUserData] = useState(null);
@@ -19,22 +19,38 @@ export default function PanelPageContent() {
   const [newLogin, setNewLogin] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // Stany dla panelu administratora (Users)
+  // Stany dla panelu administratora - Users
   const [allUsers, setAllUsers] = useState([]);
   const [adminEditRows, setAdminEditRows] = useState({});
   const [sortColumn, setSortColumn] = useState("login");
   const [sortOrder, setSortOrder] = useState("asc");
   const [adminMenuOption, setAdminMenuOption] = useState("users");
 
-  // Stany dla widoku "Gracz"
+  // Stany dla panelu administratora - Gracz
   const [gracze, setGracze] = useState([]);
   const [editGraczRows, setEditGraczRows] = useState({});
   const [graczSortColumn, setGraczSortColumn] = useState("nazwisko");
   const [graczSortOrder, setGraczSortOrder] = useState("asc");
-  const [newGraczEmail, setNewGraczEmail] = useState("");
-  const [newGraczImie, setNewGraczImie] = useState("");
-  const [newGraczNazwisko, setNewGraczNazwisko] = useState("");
+  const [isEditingGracze, setIsEditingGracze] = useState(false);
+  const [editedGracze, setEditedGracze] = useState([]);
   const [newGraczMessage, setNewGraczMessage] = useState("");
+  const wojewodztwa = [
+    "Dolnośląskie",
+    "Kujawsko-pomorskie",
+    "Lubelskie",
+    "Lubuskie",
+    "Łódzkie",
+    "Małopolskie",
+    "Mazowieckie",
+    "Opolskie",
+    "Podkarpackie",
+    "Podlaskie",
+    "Pomorskie",
+    "Śląskie",
+    "Świętokrzyskie",
+    "Warmińsko-mazurskie",
+    "Zachodniopomorskie"
+  ];
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -102,7 +118,7 @@ export default function PanelPageContent() {
     fetchUserData();
   }, [session, userRecordChecked]);
 
-  // Pobierz dane wszystkich użytkowników (Users) dla admina
+  // Dla admina: pobierz dane wszystkich użytkowników
   useEffect(() => {
     const fetchAllUsers = async () => {
       if (!userData || userData.ranga !== "admin") return;
@@ -116,7 +132,7 @@ export default function PanelPageContent() {
     fetchAllUsers();
   }, [userData]);
 
-  // Pobierz dane z tabeli "gracz" dla admina
+  // Dla admina: pobierz dane z tabeli "gracz"
   useEffect(() => {
     const fetchGracze = async () => {
       if (!userData || userData.ranga !== "admin") return;
@@ -164,11 +180,10 @@ export default function PanelPageContent() {
     return graczSortOrder === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA);
   });
 
-  // Funkcja aktualizująca dane użytkownika (w panelu użytkownika)
+  // Aktualizacja danych użytkownika (panel użytkownika)
   const handleUpdateUser = async (e) => {
     e.preventDefault();
     setUpdateMessage("");
-
     if (newEmail !== userData.email) {
       const res = await fetch(`/api/check-email?email=${encodeURIComponent(newEmail)}`);
       const result = await res.json();
@@ -177,7 +192,6 @@ export default function PanelPageContent() {
         return;
       }
     }
-
     if (newLogin !== userData.login) {
       const res2 = await fetch(`/api/check-login?login=${encodeURIComponent(newLogin)}`);
       const result2 = await res2.json();
@@ -186,7 +200,6 @@ export default function PanelPageContent() {
         return;
       }
     }
-
     const { error: reauthError } = await supabase.auth.signInWithPassword({
       email: userData.email,
       password: confirmPassword,
@@ -195,7 +208,6 @@ export default function PanelPageContent() {
       setUpdateMessage("Potwierdzenie hasłem nie powiodło się: " + reauthError.message);
       return;
     }
-
     if (newEmail !== userData.email) {
       const { error: updateAuthError } = await supabase.auth.updateUser({
         email: newEmail,
@@ -205,7 +217,6 @@ export default function PanelPageContent() {
         return;
       }
     }
-
     if (newLogin !== userData.login) {
       const { error: updateMetaError } = await supabase.auth.updateUser({
         data: { display_name: newLogin },
@@ -215,7 +226,6 @@ export default function PanelPageContent() {
         return;
       }
     }
-
     const { error } = await supabase
       .from("users")
       .update({ email: newEmail, login: newLogin })
@@ -235,7 +245,7 @@ export default function PanelPageContent() {
     }
   };
 
-  // Funkcja aktualizująca dane w wierszu tabeli Users (dla admina)
+  // Admin update for Users table row
   const handleAdminRowEdit = async (userId) => {
     const newEmailValue = adminEditRows[userId]?.editedEmail;
     const newLoginValue = adminEditRows[userId]?.editedLogin;
@@ -257,7 +267,7 @@ export default function PanelPageContent() {
     }
   };
 
-  // Funkcja aktualizująca dane w wierszu tabeli Gracz (dla admina)
+  // Admin update for Gracz table row
   const handleGraczSave = async (graczId) => {
     const edited = editGraczRows[graczId];
     if (!edited) return;
@@ -272,25 +282,20 @@ export default function PanelPageContent() {
     }
   };
 
-  // Funkcja dodająca nowy rekord do tabeli "gracz"
+  // Admin add new Gracz record
   const handleAddGracz = async (e) => {
     e.preventDefault();
     setNewGraczMessage("");
-
     if (!newGraczImie || !newGraczNazwisko) {
       setNewGraczMessage("Imię i nazwisko są obowiązkowe!");
       return;
     }
-
     const emailToUse = newGraczEmail ? newGraczEmail : "unknown@example.com";
-
     const { error } = await supabase.from("gracz").insert({
       email: emailToUse,
       imie: newGraczImie,
       nazwisko: newGraczNazwisko,
-      // Pozostałe pola mogą być puste, ranking domyślny to 1200
     });
-
     if (error) {
       setNewGraczMessage("Błąd dodawania rekordu: " + error.message);
     } else {
@@ -303,18 +308,39 @@ export default function PanelPageContent() {
     }
   };
 
+  // Admin Gracz - toggle edit mode for entire table
+  const handleToggleGraczEdit = () => {
+    setIsEditingGracze(!isEditingGracze);
+    if (!isEditingGracze) {
+      // Initialize editedGracze with a copy of current gracze data
+      setEditedGracze(gracze.map((gracz) => ({ ...gracz })));
+    }
+  };
+
+  // Admin Gracz - save all edited rows
+  const handleSaveGraczeEdits = async () => {
+    for (let edited of editedGracze) {
+      await supabase.from("gracz").update(edited).eq("id", edited.id);
+    }
+    const { data, error } = await supabase.from("gracz").select("*");
+    if (!error) {
+      setGracze(data);
+    }
+    setIsEditingGracze(false);
+  };
+
   if (!session || !userRecordChecked || !userData) {
     return (
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center bg-gray-100 min-h-screen">
         <p>Ładowanie...</p>
       </div>
     );
   }
 
   return (
-    <div className="p-4 text-sm">
+    <div className="p-4 text-sm bg-gray-100 min-h-screen">
       {/* Panel użytkownika */}
-      <div className="w-[800px] mx-auto p-6 rounded-lg shadow-md mb-8">
+      <div className="w-[800px] mx-auto p-6 rounded-lg shadow-md mb-8 bg-white">
         <h1 className="text-2xl font-bold mb-4">Panel użytkownika</h1>
         {editMode ? (
           <form onSubmit={handleUpdateUser} className="space-y-2">
@@ -385,9 +411,9 @@ export default function PanelPageContent() {
         )}
       </div>
 
-      {/* Panel administratora: dodatkowe menu */}
+      {/* Panel administratora */}
       {userData.ranga === "admin" && (
-        <div className="w-[800px] mx-auto p-6 rounded-lg shadow-md mb-8">
+        <div className="w-[800px] mx-auto p-6 rounded-lg shadow-md mb-8 bg-white">
           <h2 className="text-xl font-bold mb-4">Panel administratora</h2>
           <div className="flex gap-4 mb-4">
             <button
@@ -396,7 +422,6 @@ export default function PanelPageContent() {
             >
               Users
             </button>
-            
             <button
               onClick={() => setAdminMenuOption("gracz")}
               className={`px-4 py-2 rounded ${adminMenuOption === "gracz" ? "bg-blue-600 text-white" : "bg-gray-200 text-black"}`}
@@ -524,27 +549,50 @@ export default function PanelPageContent() {
             </div>
           )}
 
-          {adminMenuOption === "orders" && (
-            <div>
-              <p>Funkcjonalność przeglądania i edycji tabeli Orders w trakcie wdrażania.</p>
-            </div>
-          )}
-
-          {adminMenuOption === "products" && (
-            <div>
-              <p>Funkcjonalność przeglądania i edycji tabeli Products w trakcie wdrażania.</p>
-            </div>
-          )}
-
           {adminMenuOption === "gracz" && (
             <div>
               <h3 className="font-bold my-4">Tabela Gracz</h3>
-              {gracze.length === 0 ? (
-                <p>Brak rekordów w tabeli gracz.</p>
-              ) : (
-                <table className="w-full table-auto border-collapse text-xs">
-                  <thead>
-                    <tr>
+              <button
+                className="mb-4 bg-blue-500 text-white px-4 py-2 rounded"
+                onClick={handleToggleGraczEdit}
+              >
+                {isEditingGracze ? "Zakończ edycję" : "Edytuj"}
+              </button>
+              {isEditingGracze && (
+                <button
+                  className="mb-4 ml-4 bg-green-500 text-white px-4 py-2 rounded"
+                  onClick={handleSaveGraczeEdits}
+                >
+                  Zapisz zmiany
+                </button>
+              )}
+              <table className="w-full table-auto border-collapse text-xs">
+                <thead>
+                  <tr>
+                    {[
+                      "id",
+                      "uid",
+                      "email",
+                      "imie",
+                      "nazwisko",
+                      "miasto",
+                      "wojewodztwo",
+                      "rok_urodzenia",
+                      "ranking",
+                    ].map((col) => (
+                      <th
+                        key={col}
+                        className="border p-1 cursor-pointer"
+                        onClick={() => handleGraczSort(col)}
+                      >
+                        {col} {graczSortColumn === col && (graczSortOrder === "asc" ? "▲" : "▼")}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {(isEditingGracze ? editedGracze : sortedGracze).map((gracz, index) => (
+                    <tr key={gracz.id}>
                       {[
                         "id",
                         "uid",
@@ -555,91 +603,56 @@ export default function PanelPageContent() {
                         "wojewodztwo",
                         "rok_urodzenia",
                         "ranking",
-                      ].map((col) => (
-                        <th
-                          key={col}
-                          className="border p-1 cursor-pointer"
-                          onClick={() => handleGraczSort(col)}
-                        >
-                          {col} {graczSortColumn === col && (graczSortOrder === "asc" ? "▲" : "▼")}
-                        </th>
-                      ))}
-                      <th className="border p-1">Akcje</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sortedGracze.map((gracz) => {
-                      const isEditing = !!editGraczRows[gracz.id];
-                      return (
-                        <tr key={gracz.id}>
-                          {[
-                            "id",
-                            "uid",
-                            "email",
-                            "imie",
-                            "nazwisko",
-                            "miasto",
-                            "wojewodztwo",
-                            "rok_urodzenia",
-                            "ranking",
-                          ].map((field) => (
-                            <td key={field} className="border p-1">
-                              {isEditing && field !== "id" ? (
-                                <input
-                                  className="border px-1 rounded w-full"
-                                  value={editGraczRows[gracz.id]?.[field] || ""}
-                                  onChange={(e) =>
-                                    setEditGraczRows((prev) => ({
-                                      ...prev,
-                                      [gracz.id]: { ...prev[gracz.id], [field]: e.target.value },
-                                    }))
-                                  }
-                                />
-                              ) : (
-                                gracz[field] || ""
-                              )}
-                            </td>
-                          ))}
-                          <td className="border p-1">
-                            {isEditing ? (
-                              <>
-                                <button
-                                  className="bg-green-500 text-white text-xs px-2 py-1 mr-1 rounded"
-                                  onClick={() => handleGraczSave(gracz.id)}
-                                >
-                                  Zapisz
-                                </button>
-                                <button
-                                  className="bg-red-500 text-white text-xs px-2 py-1 rounded"
-                                  onClick={() =>
-                                    setEditGraczRows((prev) => ({ ...prev, [gracz.id]: undefined }))
-                                  }
-                                >
-                                  Anuluj
-                                </button>
-                              </>
-                            ) : (
-                              <button
-                                className="bg-blue-500 text-white text-xs px-2 py-1 rounded"
-                                onClick={() =>
-                                  setEditGraczRows((prev) => ({ ...prev, [gracz.id]: gracz }))
-                                }
+                      ].map((field) => (
+                        <td key={field} className="border p-1">
+                          {isEditingGracze ? (
+                            field === "wojewodztwo" ? (
+                              <select
+                                value={editedGracze[index][field] || ""}
+                                onChange={(e) => {
+                                  const newValue = e.target.value;
+                                  setEditedGracze((prev) => {
+                                    const updated = [...prev];
+                                    updated[index] = { ...updated[index], [field]: newValue };
+                                    return updated;
+                                  });
+                                }}
+                                className="border px-1 rounded w-full"
                               >
-                                Edytuj
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              )}
+                                {wojewodztwa.map((option) => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <input
+                                type="text"
+                                value={editedGracze[index][field] || ""}
+                                onChange={(e) => {
+                                  const newValue = e.target.value;
+                                  setEditedGracze((prev) => {
+                                    const updated = [...prev];
+                                    updated[index] = { ...updated[index], [field]: newValue };
+                                    return updated;
+                                  });
+                                }}
+                                className="border px-1 rounded w-full"
+                              />
+                            )
+                          ) : (
+                            gracz[field] || ""
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
       )}
-
       {updateMessage && (
         <div className="w-[800px] mx-auto mt-4">
           <p className="text-center text-green-600">{updateMessage}</p>
