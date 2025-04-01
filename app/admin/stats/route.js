@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// Używamy klucza serwisowego, aby mieć pełen dostęp do tabel
+// Używamy klucza serwisowego – upewnij się, że zmienna SUPABASE_SERVICE_ROLE_KEY jest ustawiona
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -9,7 +9,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 export async function GET() {
   const stats = {};
 
-  // Liczba rekordów w auth.users (zapytanie HEAD z liczeniem)
+  // Liczba rekordów w auth.users – pamiętaj, że auth.users znajduje się w schemacie "auth"
   const { count: authUsersCount, error: countAuthError } = await supabase
     .from("auth.users")
     .select("*", { count: "exact", head: true });
