@@ -5,15 +5,7 @@ import { useRouter } from "next/navigation";
 
 import MiniPanelVisits from "./mini-panel-visits";
 
-export default function AdminPanel() {
-  return (
-    <div className="p-4">
-      <h1 className="text-3xl font-bold mb-4">Panel Administratora</h1>
-      {/* Inne elementy panelu */}
-      <MiniPanelVisits />
-    </div>
-  );
-}
+
 
 
 export default function AdminPanel() {
