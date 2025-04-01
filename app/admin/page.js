@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+
 export default function AdminPanel() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("stats"); // "stats" lub "explore"
