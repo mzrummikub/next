@@ -23,7 +23,7 @@ export async function POST(request) {
 
     // Wstaw rekord do tabeli tournaments
     const { data: tournData, error: tournError } = await supabase
-      .from("tournaments")
+      .from("turnieje")
       .insert([
         {
           nazwa,
@@ -46,12 +46,12 @@ export async function POST(request) {
     const tournamentId = tournData[0].id;
 
     // Jeśli przekazano konfigurację rund (np. obiekt konfiguracja.rounds to tablica)
-    if (konfiguracja && konfiguracja.rounds && konfiguracja.rounds.length > 0) {
+    if (konfiguracja && konfiguracja. && konfiguracja.rounds.length > 0) {
       // Iterujemy po tablicy rund i wstawiamy rekordy do tabeli rounds
       for (let r of konfiguracja.rounds) {
         const { round_nr, liczba_partii, final_round } = r;
         const { error: roundError } = await supabase
-          .from("rounds")
+          .from("runda")
           .insert([
             {
               tournament_id: tournamentId,
