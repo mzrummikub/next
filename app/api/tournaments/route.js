@@ -65,7 +65,10 @@ export async function POST(request) {
         }
       }
     }
-
+const { data, error } = await supabase
+  .from("tournaments")
+  .insert([...])
+  .select();
     return NextResponse.json({ data: tournData });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
