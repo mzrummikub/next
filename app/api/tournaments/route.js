@@ -21,6 +21,7 @@ export async function POST(request) {
       konfiguracja, // opcjonalny obiekt, np. { rounds: [ { round_nr, liczba_partii, final_round }, ... ] }
     } = body;
 
+    
     // Wstaw rekord do tabeli tournaments
     const { data: tournData, error: tournError } = await supabase
       .from("turniej")
