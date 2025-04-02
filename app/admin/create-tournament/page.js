@@ -62,7 +62,7 @@ export default function CreateTurniejPage() {
       wojewodztwo,
       limit_miejsc: Number(limitMiejsc),
       data_turnieju: dataTurnieju || null,
-      is_kolejka: typ === "liga" ? true : false,
+      kolejka: typ === "liga" ? true : false,
       ilosc_kolejek: typ === "liga" ? Number(iloscKolejek) : null,
       rundy: typ !== "liga" ? rundy.map((r) => ({
         round_nr: r.round_nr,
