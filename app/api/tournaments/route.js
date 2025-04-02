@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// Używamy klucza serwisowego – upewnij się, że SUPABASE_SERVICE_ROLE_KEY jest ustawiony
+// Używamy klucza serwisowego – upewnij się, że masz ustawioną zmienną SUPABASE_SERVICE_ROLE_KEY
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -9,6 +9,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 export async function POST(request) {
   try {
     const body = await request.json();
+    // Dane turnieju
     const {
       nazwa,
       typ,
@@ -18,13 +19,12 @@ export async function POST(request) {
       data_turnieju,
       is_kolejka,
       ilosc_kolejek,
-      konfiguracja, // opcjonalny obiekt, np. { rounds: [ { round_nr, liczba_partii, final_round }, ... ] }
+      rounds, // tablica obiektów: [{ round_nr, liczba_partii, final_round }, ...]
     } = body;
 
-    
-    // Wstaw rekord do tabeli tournaments
+    // Wstaw turniej do tabeli tournaments
     const { data: tournData, error: tournError } = await supabase
-      .from("turniej")
+      .from("tournaments")
       .insert([
         {
           nazwa,
@@ -35,24 +35,21 @@ export async function POST(request) {
           data_turnieju: data_turnieju || null,
           is_kolejka,
           ilosc_kolejek: is_kolejka ? ilosc_kolejek : null,
-          konfiguracja: konfiguracja ? konfiguracja : null,
         },
       ])
       .select();
-
     if (tournError) {
       return NextResponse.json({ error: tournError.message }, { status: 500 });
     }
 
     const tournamentId = tournData[0].id;
 
-    // Jeśli przekazano konfigurację rund (np. obiekt konfiguracja.rounds to tablica)
-    if (konfiguracja && konfiguracja. && konfiguracja.rounds.length > 0) {
-      // Iterujemy po tablicy rund i wstawiamy rekordy do tabeli rounds
-      for (let r of konfiguracja.rounds) {
+    // Jeśli przekazano rundy, wstaw rekordy do tabeli rounds
+    if (rounds && rounds.length > 0) {
+      for (let r of rounds) {
         const { round_nr, liczba_partii, final_round } = r;
         const { error: roundError } = await supabase
-          .from("runda")
+          .from("rounds")
           .insert([
             {
               tournament_id: tournamentId,
