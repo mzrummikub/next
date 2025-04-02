@@ -17,7 +17,9 @@ export default function PanelPage() {
   // Pobierz sesję i przekieruj, jeśli nie ma zalogowanego użytkownika
   useEffect(() => {
     async function getSession() {
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      const {
+        data: { session: currentSession },
+      } = await supabase.auth.getSession();
       if (!currentSession) {
         router.push("/login");
       } else {
@@ -69,7 +71,17 @@ export default function PanelPage() {
             <strong>Ostatnie logowanie:</strong>{" "}
             {userData.last_login ? new Date(userData.last_login).toLocaleString() : "Brak"}
           </p>
-          {/* Możesz dodać tu formularz do edycji własnych danych */}
+          {/* Formularz edycji danych użytkownika można dodać tutaj */}
+          {userData.ranga === "admin" && (
+            <div className="mt-4">
+              <button
+                onClick={() => router.push("/create-tournament")}
+                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              >
+                Utwórz Turniej
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <p>Brak danych użytkownika.</p>
