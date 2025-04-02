@@ -55,10 +55,10 @@ export default function PanelPage() {
   }
 
   return (
-    <div className="p-4">
+    <div className="content-start p-4">
       <h1 className="text-2xl font-bold mb-4">Twój Panel</h1>
       {userData ? (
-        <div className="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
+        <div className="p-6 rounded-lg shadow-md max-w-2xl mx-auto">
           <p><strong>Email:</strong> {userData.email}</p>
           <p><strong>Login:</strong> {userData.login}</p>
           <p><strong>Ranga:</strong> {userData.ranga}</p>
