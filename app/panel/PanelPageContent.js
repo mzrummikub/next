@@ -50,33 +50,33 @@ export default function PanelPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="flex p-4 justify-start">
         <p>Ładowanie...</p>
       </div>
     );
   }
 
   return (
-    <div className="justify-items-start p-4">
-      <h1 className="text-2xl font-bold mb-4">Twój Panel</h1>
+    <div className="">
+      
       {userData ? (
-        <div className="p-6 rounded-lg shadow-md max-w-2xl mx-auto">
-          <p><strong>Email:</strong> {userData.email}</p>
-          <p><strong>Login:</strong> {userData.login}</p>
-          <p><strong>Ranga:</strong> {userData.ranga}</p>
-          <p>
+        <div className="p-10 shadow-xl rounded-xl">
+          <p className="p-3"><strong>Email:</strong> {userData.email}</p>
+          <p className="p-3"><strong>Login:</strong> {userData.login}</p>
+          <p className="p-3"><strong>Ranga:</strong> {userData.ranga}</p>
+          <p className="p-3">
             <strong>Data utworzenia:</strong> {new Date(userData.created_at).toLocaleString()}
           </p>
-          <p>
+          <p className="p-3">
             <strong>Ostatnie logowanie:</strong>{" "}
             {userData.last_login ? new Date(userData.last_login).toLocaleString() : "Brak"}
           </p>
           {/* Formularz edycji danych użytkownika można dodać tutaj */}
           {userData.ranga === "admin" && (
-            <div className="mt-4">
+            <div className="p-2 flex justify-center mt-4  rounded-xl bg-blue-500 shadow-lg shadow-blue-500/50">
               <button
                 onClick={() => router.push("/create-tournament")}
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                className=""
               >
                 Utwórz Turniej
               </button>

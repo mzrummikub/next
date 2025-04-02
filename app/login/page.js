@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
@@ -14,7 +14,6 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
   const router = useRouter();
 
-  // Jeśli użytkownik już jest zalogowany, przekieruj na /panel
   useEffect(() => {
     const checkSession = async () => {
       const {
@@ -49,34 +48,48 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center p-4 w-1/2">
+    <div className="flex items-center justify-center bg-blue-700">
       <div className="p-6 rounded-lg shadow-md w-full max-w-lg">
         <h2 className="text-2xl font-bold text-center mb-6">Logowanie</h2>
-        <form onSubmit={handleLogin}>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-semibold mb-1">
-              Email:
-            </label>
+        <form onSubmit={handleLogin} className="space-y-6">
+          {/* Floating label - Email */}
+          <div className="relative">
             <input
               type="email"
-              className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500"
+              id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              placeholder=" "
+              className="peer w-full border border-gray-300 px-3 pt-6 pb-2 rounded-xl focus:outline-none focus:border-blue-500"
             />
-          </div>
-          <div className="mb-6">
-            <label className="block text-gray-700 font-semibold mb-1">
-              Hasło:
+            <label
+              htmlFor="email"
+              className="absolute left-3 top-2 text-sm text-gray-500 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
+            >
+              Email
             </label>
+          </div>
+
+          {/* Floating label - Hasło */}
+          <div className="relative">
             <input
               type="password"
-              className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500"
+              id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              placeholder=" "
+              className="peer w-full border border-gray-300 px-3 pt-6 pb-2 rounded-xl focus:outline-none focus:border-blue-500"
             />
+            <label
+              htmlFor="password"
+              className="absolute left-3 top-2 text-sm text-gray-500 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
+            >
+              Hasło
+            </label>
           </div>
+
           <button
             type="submit"
             className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
@@ -84,6 +97,7 @@ export default function LoginPage() {
             Zaloguj się
           </button>
         </form>
+
         {message && (
           <p className="mt-4 text-center text-green-500">{message}</p>
         )}

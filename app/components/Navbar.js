@@ -74,11 +74,11 @@ export function Navbar() {
           <div className="flex items-center gap-2">
             {user ? (
               <>
-                <button onClick={handleLogout} className="text-white text-xs px-2 py-2">
+                <button onClick={handleLogout} className="text-white text-md px-2 py-2">
                   Wyloguj: {login || '...'}
                 </button>
                 <Link href="/panel">
-                  <button className="text-white text-xs px-2 py-2">
+                  <button className="text-white text-md px-2 py-2">
                     Panel gracza
                   </button>
                 </Link>
@@ -86,12 +86,12 @@ export function Navbar() {
             ) : (
               <>
                 <Link href="/login">
-                  <button className="text-white text-xs px-2 py-2">
+                  <button className="text-white text-md px-2 py-2">
                     Zaloguj się
                   </button>
                 </Link>
                 <Link href="/register">
-                  <button className="text-white text-xs px-2 py-2">
+                  <button className="text-white text-md px-2 py-2">
                     Zarejestruj się
                   </button>
                 </Link>
@@ -108,14 +108,14 @@ export function Navbar() {
           </button>
         </div>
 
-        <div className="flex justify-center my-2">
+        <div className="flex justify-center my-1 ">
           <Image
             src="/logo.png"
             alt="Logo"
             width={640}
             height={0}
             priority
-            className="w-full max-w-[640px] h-auto"
+            className="w-full max-w-[640px] h-auto p-2"
           />
         </div>
 
@@ -131,6 +131,11 @@ export function Navbar() {
                 Panel gracza
               </button>
             </Link>
+            <Link href="/">
+              <button className="w-60 px-2 py-2 bg-blue-600 text-white rounded-xl">
+                Hom
+              </button>
+            </Link>
           </div>
         )}
       </div>
@@ -140,11 +145,11 @@ export function Navbar() {
         <div className="flex items-center justify-end gap-2 mb-2">
           {user ? (
             <>
-              <button onClick={handleLogout} className="text-white text-xs px-2 py-2">
+              <button onClick={handleLogout} className="text-white text-md px-2 py-2">
                 Wyloguj: {login || '...'}
               </button>
               <Link href="/panel">
-                <button className="text-white text-xs px-2 py-2">
+                <button className="text-white text-md px-2 py-2">
                   Panel gracza
                 </button>
               </Link>
@@ -152,12 +157,12 @@ export function Navbar() {
           ) : (
             <>
               <Link href="/login">
-                <button className="text-white text-xs px-2 py-2">
+                <button className="text-white text-md px-2 py-2">
                   Zaloguj się
                 </button>
               </Link>
               <Link href="/register">
-                <button className="text-white text-xs px-2 py-2">
+                <button className="text-white text-md px-2 py-2">
                   Zarejestruj się
                 </button>
               </Link>

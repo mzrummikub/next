@@ -9,7 +9,7 @@ export default function Sidebar() {
     <>
       {/* Przycisk Hamburger Menu dla telefonów */}
       <button 
-        className="sm:hidden fixed top-4 left-4 z-50 bg-blue-600 text-white p-2 rounded"
+        className="sm:hidden fixed top-4 left-4 z-50 bg-blue-600 p-2 rounded-md"
         onClick={() => setIsOpen(!isOpen)}
       >
         ☰
@@ -17,7 +17,7 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <aside className={`
-        fixed sm:relative top-0 left-0 h-full text-white p-4 z-40
+        fixed sm:relative top-0 left-0 h-full p-4 z-40
         transition-transform transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
         sm:translate-x-0 sm:w-64 w-64
       `}>
@@ -25,41 +25,22 @@ export default function Sidebar() {
           {/* HOME */}
           <li>
             <Link href="/">
-              <button className="w-full px-4 py-2 bg-blue-600 rounded">Home</button>
+              <button className="w-full px-3 py-2 bg-blue-500 shadow-xl shadow-blue-500/50 rounded-xl font-bold">Hoome</button>
             </Link>
           </li>
-
           {/* LOGOWANIE */}
           <li>
             <Link href="/login">
-              <button className="w-full px-4 py-2 bg-blue-600 rounded">Logowanie</button>
+              <button className="w-full px-3 py-2 bg-blue-500 shadow-xl shadow-blue-500/50 rounded-xl font-bold">Logowanie</button>
             </Link>
           </li>
 
            {/* PANEL */}
            <li>
             <Link href="/panel">
-              <button className="w-full px-4 py-2 bg-blue-600 rounded">Panel gracza</button>
+              <button className="w-full px-3 py-2 bg-blue-500 shadow-xl shadow-blue-500/50 rounded-xl font-bold">Panel gracza</button>
             </Link>
-          </li>
-          {/* PANEL */}
-          <li>
-            <Link href="/panel">
-              <button className="w-full px-4 py-2 bg-blue-600 rounded">Link 1</button>
-            </Link>
-          </li>
-          {/* PANEL */}
-          <li>
-            <Link href="/panel">
-              <button className="w-full px-4 py-2 bg-blue-600 rounded">Link 2</button>
-            </Link>
-          </li>
-          {/* PANEL */}
-          <li>
-            <Link href="/panel">
-              <button className="w-full px-4 py-2 bg-blue-600 rounded">Link 3</button>
-            </Link>
-          </li>
+          </li>          
         </ul>
       </aside>
 
