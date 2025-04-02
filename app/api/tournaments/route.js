@@ -23,7 +23,7 @@ export async function POST(request) {
 
     // Wstaw rekord do tabeli tournaments
     const { data: tournData, error: tournError } = await supabase
-      .from("turnieje")
+      .from("turniej")
       .insert([
         {
           nazwa,
