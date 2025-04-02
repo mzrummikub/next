@@ -55,7 +55,7 @@ export default function PanelPage() {
   }
 
   return (
-    <div className="content-start p-4">
+    <div className="justify-items-start p-4">
       <h1 className="text-2xl font-bold mb-4">Twój Panel</h1>
       {userData ? (
         <div className="p-6 rounded-lg shadow-md max-w-2xl mx-auto">
