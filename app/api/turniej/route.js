@@ -19,11 +19,11 @@ export async function POST(request) {
       data_turnieju,
       is_kolejka,
       ilosc_kolejek,
-      rounds, // tablica obiektów: [{ round_nr, liczba_partii, final_round }, ...]
+      rundy // tablica obiektów: [{ round_nr, liczba_partii, final_round }, ...]
     } = body;
 
-    // Wstaw turniej do tabeli tournaments
-    const { data: tournData, error: tournError } = await supabase
+    // Wstaw turniej do tabeli turniej
+    const { data: turniejData, error: turniejError } = await supabase
       .from("turniej")
       .insert([
         {
@@ -38,21 +38,22 @@ export async function POST(request) {
         },
       ])
       .select();
-    if (tournError) {
-      return NextResponse.json({ error: tournError.message }, { status: 500 });
+      
+    if (turniejError) {
+      return NextResponse.json({ error: turniejError.message }, { status: 500 });
     }
 
-    const tournamentId = tournData[0].id;
+    const turniejId = turniejData[0].id;
 
-    // Jeśli przekazano rundy, wstaw rekordy do tabeli rounds
-    if (rounds && rounds.length > 0) {
-      for (let r of rounds) {
+    // Jeśli przesłano konfigurację rund, wstaw rekordy do tabeli runda
+    if (rundy && rundy.length > 0) {
+      for (let r of rundy) {
         const { round_nr, liczba_partii, final_round } = r;
         const { error: roundError } = await supabase
           .from("runda")
           .insert([
             {
-              tournament_id: tournamentId,
+              turniej_id: turniejId,
               round_nr,
               liczba_partii,
               final_round,
@@ -64,7 +65,7 @@ export async function POST(request) {
       }
     }
 
-    return NextResponse.json({ data: tournData });
+    return NextResponse.json({ data: turniejData });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
