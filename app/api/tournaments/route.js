@@ -24,7 +24,7 @@ export async function POST(request) {
 
     // Wstaw turniej do tabeli tournaments
     const { data: tournData, error: tournError } = await supabase
-      .from("tournaments")
+      .from("turniej")
       .insert([
         {
           nazwa,
@@ -49,7 +49,7 @@ export async function POST(request) {
       for (let r of rounds) {
         const { round_nr, liczba_partii, final_round } = r;
         const { error: roundError } = await supabase
-          .from("rounds")
+          .from("runda")
           .insert([
             {
               tournament_id: tournamentId,
