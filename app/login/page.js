@@ -48,8 +48,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center bg-blue-700">
-      <div className="p-6 rounded-lg shadow-md w-full max-w-lg">
+    <div className="flex items-center justify-center">
+      <div className="p-6 rounded-xl w-full max-w-lg">
         <h2 className="text-2xl font-bold text-center mb-6">Logowanie</h2>
         <form onSubmit={handleLogin} className="space-y-6">
           {/* Floating label - Email */}
@@ -92,7 +92,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
+            className="w-full bg-blue-500 shadow-lg shadow-blue-500/50 text-white py-4 rounded-xl hover:bg-blue-600 transition font-bold"
           >
             Zaloguj się
           </button>

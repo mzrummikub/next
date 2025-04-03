@@ -25,20 +25,20 @@ export default function Sidebar() {
           {/* HOME */}
           <li>
             <Link href="/">
-              <button className="w-full px-3 py-2 bg-blue-500 shadow-xl shadow-blue-500/50 rounded-xl font-bold">Hoome</button>
+              <button className="w-full px-3 py-2 bg-white shadow-xl shadow-blue-500/50 rounded-xl font-bold text-blue-500">Home</button>
             </Link>
           </li>
           {/* LOGOWANIE */}
           <li>
             <Link href="/login">
-              <button className="w-full px-3 py-2 bg-blue-500 shadow-xl shadow-blue-500/50 rounded-xl font-bold">Logowanie</button>
+              <button className="w-full px-3 py-2 bg-white shadow-xl shadow-blue-500/50 rounded-xl font-bold text-blue-500">Logowanie</button>
             </Link>
           </li>
 
            {/* PANEL */}
            <li>
             <Link href="/panel">
-              <button className="w-full px-3 py-2 bg-blue-500 shadow-xl shadow-blue-500/50 rounded-xl font-bold">Panel gracza</button>
+              <button className="w-full px-3 py-2 bg-white shadow-xl shadow-blue-500/50 rounded-xl font-bold text-blue-500">Panel gracza</button>
             </Link>
           </li>          
         </ul>

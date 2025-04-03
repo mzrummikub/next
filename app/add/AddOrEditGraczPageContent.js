@@ -123,7 +123,7 @@ export default function AddOrEditGraczPageContent() {
   };
 
   return (
-    <div className="max-w-xl mx-auto bg-white p-6 rounded shadow">
+    <div className="max-w-xl mx-auto p-6 rounded shadow">
       <h1 className="text-2xl font-bold mb-4">
         {id ? "Edytuj gracza" : "Dodaj nowego gracza"}
       </h1>
