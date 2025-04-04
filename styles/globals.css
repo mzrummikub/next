@@ -6,7 +6,3 @@ body {
    background-color: #000080;
    @apply text-white
   }
-  .panel {
-   margin-left: 0 !important;
-   text-align: left;
- }
