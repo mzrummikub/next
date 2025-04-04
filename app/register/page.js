@@ -1,5 +1,6 @@
-"use client";
+  "use client";
 
+import { useStat, useEffect } from "react";
 import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
@@ -36,53 +37,92 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex items-center justify-center p-4 w-1/2 mx-auto">
-      <div className="p-6 rounded-lg shadow-md w-full max-w-md">
+    <div className="flex items-center justify-center">
+      <div className="p-6 rounded-xl w-full max-w-lg">
         <h2 className="text-2xl font-bold text-center mb-6">Rejestracja</h2>
-        <form onSubmit={handleRegister}>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-semibold mb-1">Email:</label>
+        <form onSubmit={handleRegister} className="space-y-6">
+          {/* Floting label - Rejestracja */}
+          <div className="relative">
             <input
               type="email"
-              className="w-full border border-gray-300 p-2 rounded"
+              id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              placeholder=" "
+              className="peer w-full border border-gray-300 px-3 pt-6 pb-2 rounded-xl focus:outline-none focus:border-blue-500"
             />
+            <label
+              htmlFor="email"
+              className="absolute left-3 top-2 text-sm text-gray-500 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
+            >
+              Email
+            </label>
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-semibold mb-1">Login:</label>
+
+          {/* Floting label - Login */}
+          <div className="relative">
             <input
               type="text"
-              className="w-full border border-gray-300 p-2 rounded"
+              id="text"
               value={login}
               onChange={(e) => setLogin(e.target.value)}
               required
+              placeholder=" "
+              className="peer w-full border border-gray-300 px-3 pt-6 pb-2 rounded-xl focus:outline-none focus:border-blue-500"
             />
+            <label
+              htmlFor="text"
+              className="absolute left-3 top-2 text-sm text-gray-500 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
+            >
+              Login
+            </label>
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-semibold mb-1">Hasło:</label>
+
+          {/* Floating label - Hasło */}
+          <div className="relative">
             <input
               type="password"
-              className="w-full border border-gray-300 p-2 rounded"
+              id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              placeholder=" "
+              className="peer w-full border border-gray-300 px-3 pt-6 pb-2 rounded-xl focus:outline-none focus:border-blue-500"
             />
+            <label
+              htmlFor="password"
+              className="absolute left-3 top-2 text-sm text-gray-500 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
+            >
+              Hasło
+            </label>
           </div>
-          <div className="mb-6">
-            <label className="block text-gray-700 font-semibold mb-1">Powtórz hasło:</label>
+
+          {/* Floating label - Potwierdzenie Hasło */}
+          <div className="relative">
             <input
               type="password"
-              className="w-full border border-gray-300 p-2 rounded"
+              id="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
+              placeholder=" "
+              className="peer w-full border border-gray-300 px-3 pt-6 pb-2 rounded-xl focus:outline-none focus:border-blue-500"
             />
+            <label
+              htmlFor="password"
+              className="absolute left-3 top-2 text-sm text-gray-500 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
+            >
+              Powtórz Hasło
+            </label>
           </div>
+
+
+
+
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+            className="w-full bg-blue-500 shadow-lg shadow-blue-500/50 text-white py-4 rounded-xl hover:bg-blue-600 transition font-bold"
           >
             Zarejestruj się
           </button>

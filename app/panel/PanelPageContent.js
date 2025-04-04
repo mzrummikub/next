@@ -57,31 +57,21 @@ export default function PanelPage() {
   }
 
   return (
-    <div className="">
+    <div className="panel max-w-lg p-4">
       
       {userData ? (
-        <div className="p-10 shadow-xl rounded-xl">
-          <p className="p-3"><strong>Email:</strong> {userData.email}</p>
-          <p className="p-3"><strong>Login:</strong> {userData.login}</p>
-          <p className="p-3"><strong>Ranga:</strong> {userData.ranga}</p>
-          <p className="p-3">
+        <div className="p-3">
+          <p className="p-2"><strong className="">Email:</strong> {userData.email}</p>
+          <p className="p-2"><strong>Login:</strong> {userData.login}</p>
+          <p className="p-2"><strong>Ranga:</strong> {userData.ranga}</p>
+          <p className="p-2">
             <strong>Data utworzenia:</strong> {new Date(userData.created_at).toLocaleString()}
           </p>
-          <p className="p-3">
+          <p className="p-2">
             <strong>Ostatnie logowanie:</strong>{" "}
             {userData.last_login ? new Date(userData.last_login).toLocaleString() : "Brak"}
           </p>
-          {/* Formularz edycji danych użytkownika można dodać tutaj */}
-          {userData.ranga === "admin" && (
-            <div className="p-2 flex justify-center mt-4  rounded-xl bg-blue-500 shadow-lg shadow-blue-500/50">
-              <button
-                onClick={() => router.push("/create-tournament")}
-                className=""
-              >
-                Utwórz Turniej
-              </button>
-            </div>
-          )}
+          
         </div>
       ) : (
         <p>Brak danych użytkownika.</p>

@@ -14,7 +14,7 @@ export function Navbar() {
   const [user, setUser] = useState(null);
   const [login, setLogin] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const router = useRouter(); // Inicjalizacja routera
+  const router = useRouter();
 
   // Funkcja obsługująca wylogowanie
   const handleLogout = async () => {
@@ -133,7 +133,7 @@ export function Navbar() {
             </Link>
             <Link href="/">
               <button className="w-60 px-2 py-2 bg-blue-600 text-white rounded-xl">
-                Hom
+                Home
               </button>
             </Link>
           </div>
