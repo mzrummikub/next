@@ -97,7 +97,7 @@ export default function RegisterPage() {
 
   return (
     <div className="flex items-center justify-center">
-      <div className="p-6 rounded-xl w-full max-w-lg">
+      <div className="p-6 w-1/2">
         <h2 className="text-2xl font-bold text-center mb-6">Rejestracja</h2>
         <form onSubmit={handleRegister} className="space-y-6">
           {/* Pole email */}
