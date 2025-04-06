@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -12,10 +12,14 @@ export default function RegisterPage() {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [emailExists, setEmailExists] = useState(false);
+  
+  // Stany do sprawdzania dostępności – null: nie sprawdzono, true: zajęty, false: dostępny
+  const [emailExists, setEmailExists] = useState(null);
+  const [loginExists, setLoginExists] = useState(null);
+  
   const [message, setMessage] = useState("");
 
-  // Funkcja sprawdzająca, czy email istnieje
+  // Sprawdź dostępność emaila z tabeli users
   const checkEmail = async (emailToCheck) => {
     try {
       const res = await fetch(`/api/check-email?email=${encodeURIComponent(emailToCheck)}`);
@@ -26,17 +30,21 @@ export default function RegisterPage() {
     }
   };
 
-  // Używamy useEffect z debounce, aby sprawdzać email na bieżąco
-  useEffect(() => {
-    if (!email) return; // Nie wysyłaj zapytania, jeśli email jest pusty
-    const timer = setTimeout(() => {
-      checkEmail(email);
-    }, 500); // opóźnienie 500 ms
-    return () => clearTimeout(timer);
-  }, [email]);
+  // Sprawdź dostępność loginu z tabeli users
+  const checkLogin = async (loginToCheck) => {
+    try {
+      const res = await fetch(`/api/check-login?login=${encodeURIComponent(loginToCheck)}`);
+      const data = await res.json();
+      setLoginExists(data.exists);
+    } catch (error) {
+      console.error("Błąd przy sprawdzaniu loginu:", error);
+    }
+  };
 
+  // Obsługa rejestracji – tworzy użytkownika w Auth, a następnie rekord w tabeli users
   const handleRegister = async (e) => {
     e.preventDefault();
+    setMessage("");
     if (password !== confirmPassword) {
       setMessage("Hasła nie są identyczne!");
       return;
@@ -45,20 +53,46 @@ export default function RegisterPage() {
       setMessage("Podany email już istnieje!");
       return;
     }
-    // Rejestracja w Auth z dodatkowym user_metadata (display_name)
+    if (loginExists) {
+      setMessage("Podany login już jest zajęty!");
+      return;
+    }
+
+    // Rejestracja w Supabase Auth, z zapisaniem loginu jako display_name w user_metadata
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: { display_name: login },
-      },
+      options: { data: { display_name: login } },
     });
-    console.log("Data:", data, "Error:", error);
+
+    console.log("Data z signUp:", data, "Error:", error);
     if (error) {
       setMessage(error.message);
-    } else {
-      setMessage("Rejestracja zakończona! Sprawdź swój email w celu weryfikacji konta.");
+      return;
     }
+    
+    // Po rejestracji, jeśli mamy user id, wywołujemy endpoint insert-user, aby stworzyć rekord w tabeli users
+    const userId = data.user?.id;
+    if (userId) {
+      try {
+        const res = await fetch("/api/insert-user", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: userId, email, login }),
+        });
+        const result = await res.json();
+        console.log("Wstawianie do tabeli users:", result);
+        if (result.error) {
+          setMessage("Błąd w tworzeniu rekordu w tabeli users: " + result.error);
+          return;
+        }
+      } catch (err) {
+        setMessage("Błąd podczas wywoływania insert-user: " + err.message);
+        return;
+      }
+    }
+    
+    setMessage("Rejestracja zakończona! Sprawdź swój email w celu weryfikacji konta.");
   };
 
   return (
@@ -66,50 +100,63 @@ export default function RegisterPage() {
       <div className="p-6 rounded-xl w-full max-w-lg">
         <h2 className="text-2xl font-bold text-center mb-6">Rejestracja</h2>
         <form onSubmit={handleRegister} className="space-y-6">
-          {/* Floating label - Email */}
+          {/* Pole email */}
           <div className="relative">
             <input
               type="email"
               id="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setEmailExists(null); // resetuj stan przy zmianie
+              }}
+              onBlur={() => { if (email) checkEmail(email); }}
               required
               placeholder=" "
-              className="peer w-full border border-gray-300 px-3 pt-6 pb-2 rounded-xl focus:outline-none focus:border-blue-500"
+              className="peer w-full border border-white px-3 pt-6 pb-2 rounded-xl focus:outline-none focus:border-blue-500"
             />
             <label
               htmlFor="email"
-              className="absolute left-3 top-2 text-sm text-gray-500 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
+              className="absolute left-3 top-2 text-sm text-white transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-white peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
             >
               Email
             </label>
-            {email && (
-              <p className="mt-1 text-xs text-red-500">
-                {emailExists ? "Email już istnieje" : "Email dostępny"}
+            {email && emailExists !== null && (
+              <p className={`mt-1 text-xs ${emailExists ? "text-red-500 font-bold" : "text-green-500 font-bold"}`}>
+                {emailExists ? "Email już zajęty" : "Email dostępny"}
               </p>
             )}
           </div>
 
-          {/* Floating label - Login */}
+          {/* Pole login */}
           <div className="relative">
             <input
               type="text"
               id="login"
               value={login}
-              onChange={(e) => setLogin(e.target.value)}
+              onChange={(e) => {
+                setLogin(e.target.value);
+                setLoginExists(null);
+              }}
+              onBlur={() => { if (login) checkLogin(login); }}
               required
               placeholder=" "
-              className="peer w-full border border-gray-300 px-3 pt-6 pb-2 rounded-xl focus:outline-none focus:border-blue-500"
+              className="peer w-full border border-white px-3 pt-6 pb-2 rounded-xl focus:outline-none focus:border-blue-500"
             />
             <label
               htmlFor="login"
-              className="absolute left-3 top-2 text-sm text-gray-500 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
+              className="absolute left-3 top-2 text-sm text-white transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-white peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
             >
               Login
             </label>
+            {login && loginExists !== null && (
+              <p className={`mt-1 text-xs ${loginExists ? "text-red-500 font-bold " : "text-green-500 font-bold"}`}>
+                {loginExists ? "Login już zajęty" : "Login dostępny"}
+              </p>
+            )}
           </div>
 
-          {/* Floating label - Hasło */}
+          {/* Pole hasło */}
           <div className="relative">
             <input
               type="password"
@@ -118,17 +165,17 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder=" "
-              className="peer w-full border border-gray-300 px-3 pt-6 pb-2 rounded-xl focus:outline-none focus:border-blue-500"
+              className="peer w-full border border-white px-3 pt-6 pb-2 rounded-xl focus:outline-none focus:border-blue-500"
             />
             <label
               htmlFor="password"
-              className="absolute left-3 top-2 text-sm text-gray-500 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
+              className="absolute left-3 top-2 text-sm text-white transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-white peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
             >
               Hasło
             </label>
           </div>
 
-          {/* Floating label - Powtórz Hasło */}
+          {/* Pole potwierdzenia hasła */}
           <div className="relative">
             <input
               type="password"
@@ -137,11 +184,11 @@ export default function RegisterPage() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               placeholder=" "
-              className="peer w-full border border-gray-300 px-3 pt-6 pb-2 rounded-xl focus:outline-none focus:border-blue-500"
+              className="peer w-full border border-white px-3 pt-6 pb-2 rounded-xl focus:outline-none focus:border-blue-500"
             />
             <label
               htmlFor="confirmPassword"
-              className="absolute left-3 top-2 text-sm text-gray-500 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
+              className="absolute left-3 top-2 text-sm text-white transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-white peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
             >
               Powtórz Hasło
             </label>
