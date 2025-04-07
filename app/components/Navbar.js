@@ -110,7 +110,7 @@ export function Navbar() {
 
         <div className="flex justify-center my-1 ">
           <Image
-            src="/logo2.png"
+            src="/logo.png"
             alt="Logo"
             width={640}
             height={0}
@@ -172,7 +172,7 @@ export function Navbar() {
 
         <div className="flex justify-center items-center">
           <Image
-            src="/logo2.png"
+            src="/logo.png"
             alt="Logo"
             width={640}
             height={0}
