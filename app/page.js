@@ -15,7 +15,7 @@ export default function PlayerRanking() {
   useEffect(() => {
     async function fetchRanking() {
       try {
-        // Pobieramy graczy z tabeli "gracz" i sortujemy po kolumnie "ranking" malejąco.
+        // Pobieramy graczy z tabeli "gracz" i sortujemy po kolumnie "ranking" malejąco
         const { data, error } = await supabase
           .from("gracz")
           .select("id, imie, nazwisko, ranking")
