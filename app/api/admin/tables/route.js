@@ -6,20 +6,14 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-export async function GET(req) {
-  const { searchParams } = new URL(req.url);
-  const table = searchParams.get("table");
-
-  if (!table) {
-    return NextResponse.json({ error: "Nie podano nazwy tabeli." }, { status: 400 });
-  }
-
+export async function GET() {
   try {
-    const { data, error } = await supabase.from(table).select("*").limit(1000); // limit dla bezpieczeństwa
+    const { data, error } = await supabase.rpc("pg_list_all_tables");
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    return NextResponse.json({ data }, { status: 200 });
+
+    return NextResponse.json({ tables: data }, { status: 200 });
   } catch (err) {
     return NextResponse.json({ error: "Błąd serwera." }, { status: 500 });
   }

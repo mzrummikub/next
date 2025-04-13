@@ -1,130 +1,167 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 export default function AdminPanel() {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState("stats"); // "stats" lub "explore"
-  const [stats, setStats] = useState(null);
-  const [exploreTable, setExploreTable] = useState("users"); // domyślnie "users"
-  const [exploreData, setExploreData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [tables, setTables] = useState([]);
+  const [selectedTable, setSelectedTable] = useState("");
+  const [tableData, setTableData] = useState([]);
+  const [editingRow, setEditingRow] = useState(null);
+  const [editData, setEditData] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Pobierz statystyki z API
-  const fetchStats = async () => {
+  const fetchTables = async () => {
     try {
-      const res = await fetch("/api/admin/stats");
+      const res = await fetch("/api/admin/tables");
       const json = await res.json();
       if (json.error) {
-        setErrorMessage("Błąd API: " + json.error);
+        setErrorMessage(json.error);
       } else {
-        setStats(json.stats);
+        setTables(json.tables);
+        if (json.tables.length > 0) {
+          setSelectedTable(json.tables[0]);
+        }
       }
     } catch (err) {
-      setErrorMessage("Błąd pobierania statystyk: " + err.message);
+      setErrorMessage("Błąd pobierania tabel: " + err.message);
     }
   };
 
-  // Pobierz dane z wybranej tabeli
-  const fetchExploreData = async (table) => {
+  const fetchTableData = async (table) => {
     try {
       const res = await fetch(`/api/admin/explore?table=${encodeURIComponent(table)}`);
       const json = await res.json();
       if (json.error) {
-        setErrorMessage("Błąd API: " + json.error);
+        setErrorMessage(json.error);
       } else {
-        setExploreData(json.data);
+        setTableData(json.data || []);
       }
     } catch (err) {
       setErrorMessage("Błąd pobierania danych: " + err.message);
     }
   };
 
+  const handleEditClick = (row) => {
+    setEditingRow(row);
+    setEditData({ ...row });
+  };
+
+  const handleUpdate = async () => {
+    try {
+      const res = await fetch("/api/admin/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          table: selectedTable,
+          data: editData,
+          idField: Object.keys(editingRow)[0],
+        }),
+      });
+
+      const json = await res.json();
+      if (json.error) {
+        setErrorMessage(json.error);
+      } else {
+        setEditingRow(null);
+        fetchTableData(selectedTable);
+      }
+    } catch (err) {
+      setErrorMessage("Błąd połączenia: " + err.message);
+    }
+  };
+
   useEffect(() => {
-    // Na starcie pobierz statystyki
-    fetchStats().then(() => setLoading(false));
+    fetchTables();
   }, []);
 
   useEffect(() => {
-    if (activeTab === "explore") {
-      fetchExploreData(exploreTable);
+    if (selectedTable) {
+      fetchTableData(selectedTable);
     }
-  }, [activeTab, exploreTable]);
+  }, [selectedTable]);
 
-  // Prosty UI panelu administratora
   return (
-    <div className="p-4">
-      <h1 className="text-3xl font-bold mb-4">Panel Administratora</h1>
+    <div className="p-6 max-w-7xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6">Przegląd wszystkich tabel</h1>
+
       {errorMessage && (
-        <div className="mb-4 p-2 bg-red-100 text-red-600 rounded">
+        <div className="mb-4 p-3 border-red-300 text-red-700 rounded">
           {errorMessage}
         </div>
       )}
-      <div className="mb-4">
-        <button
-          onClick={() => {
-            setActiveTab("stats");
-            setErrorMessage("");
-          }}
-          className={`px-4 py-2 mr-2 rounded ${
-            activeTab === "stats" ? "bg-blue-600 text-white" : "bg-gray-200 text-black"
-          }`}
+
+      <div className="mb-4 flex items-center gap-4">
+        <label className="text-lg font-medium">Tabela:</label>
+        <select
+          value={selectedTable}
+          onChange={(e) => setSelectedTable(e.target.value)}
+          className="border p-2 rounded"
         >
-          Statystyki
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab("explore");
-            setErrorMessage("");
-          }}
-          className={`px-4 py-2 rounded ${
-            activeTab === "explore" ? "bg-blue-600 text-white" : "bg-gray-200 text-black"
-          }`}
-        >
-          Eksplorator Bazy
-        </button>
+          {tables.map((table) => (
+            <option key={table} value={table}>
+              {table}
+            </option>
+          ))}
+        </select>
       </div>
-      {activeTab === "stats" && stats && (
-        <div className="bg-white p-6 rounded shadow-md">
-          <h2 className="text-2xl font-bold mb-4">Statystyki</h2>
-          <ul>
-            <li>
-              <strong>Auth Users:</strong> {stats.authUsers}
-            </li>
-            <li>
-              <strong>Users:</strong> {stats.users}
-            </li>
-            <li>
-              <strong>Gracz:</strong> {stats.gracz}
-            </li>
-          </ul>
+
+      {tableData.length > 0 ? (
+        <div className="overflow-auto border rounded shadow">
+          <table className="min-w-full text-sm text-left">
+            <thead className="">
+              <tr>
+                {Object.keys(tableData[0]).map((key) => (
+                  <th key={key} className="px-4 py-2 font-semibold border-b">
+                    {key}
+                  </th>
+                ))}
+                <th className="px-4 py-2 font-semibold border-b">Akcje</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tableData.map((row, idx) => (
+                <tr key={idx} className="hover:bg-green">
+                  {Object.entries(row).map(([key, value]) => (
+                    <td key={key} className="px-4 py-2 border-b">
+                      {editingRow === row ? (
+                        <input
+                          className="w-full px-2 py-1 border rounded"
+                          value={editData[key] ?? ""}
+                          onChange={(e) =>
+                            setEditData({ ...editData, [key]: e.target.value })
+                          }
+                        />
+                      ) : (
+                        String(value)
+                      )}
+                    </td>
+                  ))}
+                  <td className="px-4 py-2 border-b">
+                    {editingRow === row ? (
+                      <div className="flex gap-2">
+                        <button onClick={handleUpdate} className="text-green-600 font-semibold">
+                          Zapisz
+                        </button>
+                        <button onClick={() => setEditingRow(null)} className="text-gray-500">
+                          Anuluj
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => handleEditClick(row)}
+                        className="text-blue-600"
+                      >
+                        Edytuj
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      )}
-      {activeTab === "explore" && (
-        <div className="bg-white p-6 rounded shadow-md">
-          <h2 className="text-2xl font-bold mb-4">Eksplorator Bazy</h2>
-          <div className="mb-4">
-            <label className="mr-2">Tabela:</label>
-            <select
-              value={exploreTable}
-              onChange={(e) => setExploreTable(e.target.value)}
-              className="border p-1 rounded"
-            >
-              <option value="auth.users">Auth Users</option>
-              <option value="users">Users</option>
-              <option value="gracz">Gracz</option>
-            </select>
-          </div>
-          {exploreData ? (
-            <pre className="bg-gray-100 p-4 rounded overflow-auto max-h-96">
-              {JSON.stringify(exploreData, null, 2)}
-            </pre>
-          ) : (
-            <p>Brak danych.</p>
-          )}
-        </div>
+      ) : (
+        <p className="text-gray-600">Brak danych do wyświetlenia.</p>
       )}
     </div>
   );

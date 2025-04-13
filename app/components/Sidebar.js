@@ -40,7 +40,21 @@ export default function Sidebar() {
             <Link href="/panel">
               <button className="w-full px-3 py-2 bg-white shadow-xl shadow-blue-500/50 rounded-xl font-bold text-blue-500">Panel gracza</button>
             </Link>
-          </li>          
+          </li> 
+
+           {/* ADD turnirj */}
+           <li>
+            <Link href="/add/turniej">
+              <button className="w-full px-3 py-2 bg-white shadow-xl shadow-blue-500/50 rounded-xl font-bold text-blue-500">ADD TURNIEJ</button>
+            </Link>
+          </li>      
+
+           {/* PANEL */}
+           <li>
+            <Link href="/tabela">
+              <button className="w-full px-3 py-2 bg-white shadow-xl shadow-blue-500/50 rounded-xl font-bold text-blue-500">Tabela</button>
+            </Link>
+          </li>        
         </ul>
       </aside>
 
