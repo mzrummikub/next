@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 export default function TabelaTurniejuPage() {
+  // Stany przechowujące dane turniejów, graczy, wyników oraz komunikaty błędów.
   const [tournaments, setTournaments] = useState([]);
   const [selectedTournamentId, setSelectedTournamentId] = useState("");
   const [tournamentInfo, setTournamentInfo] = useState(null);
@@ -16,7 +17,7 @@ export default function TabelaTurniejuPage() {
 
   const [showTable, setShowTable] = useState(false);
 
-  // Pobierz turnieje
+  // Efekt pobierający listę turniejów z API przy pierwszym renderze komponentu.
   useEffect(() => {
     fetch("/api/tabela")
       .then((res) => res.json())
@@ -26,7 +27,7 @@ export default function TabelaTurniejuPage() {
       });
   }, []);
 
-  // Po wyborze turnieju
+  // Efekt wywoływany przy zmianie wybranego turnieju – pobiera szczegóły turnieju.
   useEffect(() => {
     if (!selectedTournamentId) return;
     fetch(`/api/tabela/${selectedTournamentId}`)
@@ -43,7 +44,7 @@ export default function TabelaTurniejuPage() {
       });
   }, [selectedTournamentId]);
 
-  // Pobierz graczy
+  // Efekt pobierający listę graczy z API przy pierwszym renderze komponentu.
   useEffect(() => {
     fetch("/api/gracze")
       .then((res) => res.json())
@@ -53,7 +54,7 @@ export default function TabelaTurniejuPage() {
       });
   }, []);
 
-  // Zaznaczanie checkboxów
+  // Funkcja obsługująca zaznaczanie i odznaczanie graczy (checkbox).
   const handleCheckboxChange = (player) => {
     setSelectedPlayers((prev) => {
       const already = prev.find((p) => p.id === player.id);
@@ -65,6 +66,7 @@ export default function TabelaTurniejuPage() {
     });
   };
 
+  // Funkcja aktualizująca punkty danego gracza dla konkretnej rundy i typu punktacji.
   const handlePointChange = (playerId, round, type, value) => {
     setPoints((prev) => ({
       ...prev,
@@ -78,6 +80,7 @@ export default function TabelaTurniejuPage() {
     }));
   };
 
+  // Funkcja obliczająca sumaryczną wartość punktów dla danego gracza i typu punktacji.
   const getTotal = (playerId, type) => {
     let sum = 0;
     for (let r = 1; r <= totalRounds; r++) {
@@ -93,8 +96,8 @@ export default function TabelaTurniejuPage() {
 
       {error && <p className="text-red-600 mb-4">{error}</p>}
 
-      {/* Wybór turnieju */}
-      <div className="mb-6">
+      {/* Sekcja wyboru turnieju – opakowana w div z niebieskim tłem i czarną czcionką */}
+      <div className="mb-6 text-blue-400 p-4 rounded">
         <label className="mr-2 font-medium">Wybierz turniej:</label>
         <select
           value={selectedTournamentId}
@@ -151,7 +154,7 @@ export default function TabelaTurniejuPage() {
         </div>
       )}
 
-      {/* Tabela rund */}
+      {/* Tabela rund – wyświetlana po zaznaczeniu uczestników oraz przy określonej liczbie rund */}
       {showTable && selectedPlayers.length > 0 && totalRounds > 0 && (
         <table className="border-collapse border w-full text-sm">
           <thead>
