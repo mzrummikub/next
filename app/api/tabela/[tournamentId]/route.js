@@ -7,30 +7,41 @@ const supabase = createClient(
 );
 
 export async function GET(req, context) {
-  // Rozwiązujemy obiekt params używając Promise.resolve (aby Next.js uznał, że czekamy na params)
+  // Rozwiązujemy obiekt params i logujemy otrzymane parametry
   const params = await Promise.resolve(context.params);
+  console.log("Otrzymane params:", params);
+  
   const tournamentId = params.tournamentId;
-
+  
   if (!tournamentId) {
+    console.error("Brak ID turnieju w parametrach:", params);
     return NextResponse.json({ error: "Brak ID turnieju." }, { status: 400 });
   }
-
-  // Pobieramy dane turnieju z tabeli "tournaments" na podstawie przekazanego ID
+  
+  console.log("Pobieramy turniej dla ID:", tournamentId);
+  
+  // Zapytanie do Supabase o turniej
   const { data: tournament, error: tournamentError } = await supabase
     .from("tournaments")
     .select("id, name, city, region, start_date, max_players, total_rounds")
     .eq("id", tournamentId)
     .single();
-
+  
+  console.log("Odpowiedź z Supabase:", { tournament, tournamentError });
+  
   if (tournamentError || !tournament) {
+    console.error("Błąd przy pobieraniu turnieju:", tournamentError);
     return NextResponse.json({ error: "Nie znaleziono turnieju." }, { status: 500 });
   }
-
-  // Zwracamy dane turnieju oraz liczbę rund (pole total_rounds)
-  return NextResponse.json({
+  
+  console.log("Turniej pobrany poprawnie:", tournament);
+  
+  const responseData = {
     tournament,
     totalRounds: tournament.total_rounds,
-    players: [], // Możesz dostosować tę część – opcjonalnie zwrócić lub usunąć tablicę graczy.
-  });
+    players: [], // lub dalsze przetwarzanie graczy, jeśli wymagane
+  };
+  
+  console.log("Wysyłamy odpowiedź:", responseData);
+  return NextResponse.json(responseData);
 }
-
