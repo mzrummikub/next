@@ -24,7 +24,7 @@ export async function GET(req, context) {
     .select(`
       id, 
       name, 
-      type, 
+      ranga, 
       city, 
       region, 
       start_date, 
@@ -90,7 +90,7 @@ export async function PATCH(req, context) {
     // Aktualizacja danych turnieju – przygotowujemy zapytanie, ustawiamy warunek i dodajemy .select() żeby otrzymać zaktualizowany rekord
     let updateQuery = supabase.from("tournaments").update({
       name: updateData.name,
-      type: updateData.type,
+      ranga: updateData.ranga,
       city: updateData.city,
       region: updateData.region,
       start_date: updateData.start_date,
