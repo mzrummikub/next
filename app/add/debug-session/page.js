@@ -55,7 +55,7 @@ export default function TestPermissionPage() {
     };
 
     checkPermission();
-  }, []);
+  }, [info]);
 
   if (info.loading) return <p className="p-4">🔄 Sprawdzanie uprawnień...</p>;
 
